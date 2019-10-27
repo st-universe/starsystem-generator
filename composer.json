@@ -1,5 +1,5 @@
 {
-  "name": "usox/stu3-starsystem-generator",
+  "name": "st-universe/starsystem-generator",
   "autoload": {
     "psr-4": {
       "Stu\\StarsystemGenerator\\": "src/StarsystemGenerator"
