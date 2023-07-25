@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="tests/Bootstrap.php"
+         colors="true"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
+         cacheDirectory="build/.phpunit.cache"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+>
+  <coverage/>
+  <source>
+    <include>
+      <directory>src</directory>
+    </include>
+    <exclude>
+      <directory suffix="services.php">src</directory>
+      <directory>src/Public</directory>
+      <directory>src/OrmProxy</directory>
+    </exclude>
+  </source>
+  <testsuites>
+    <testsuite name="STU">
+      <directory>./tests</directory>
+    </testsuite>
+  </testsuites>
+  <php>
+    <server name="APP_ENV" value="testing"/>
+  </php>
+</phpunit>
