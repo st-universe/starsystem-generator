@@ -6,22 +6,49 @@
     }
   },
   "require": {
-    "php": "^7.3 || ^8"
+    "php": "^8.2"
   },
   "require-dev": {
-    "phpunit/phpunit": "^7.3 || ^8",
+    "bnf/phpstan-psr-container": "^1.0",
+    "phpunit/phpunit": "^10",
     "mockery/mockery": "^1.1",
+    "phpstan/extension-installer": "^1.2",
+    "phpstan/phpstan": "^1.9",
+    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "phpstan/phpstan-doctrine": "^1.3",
+    "phpstan/phpstan-mockery": "^1.1",
+    "phpstan/phpstan-phpunit": "^1.3",
     "st-universe/assets": "dev-master",
     "mnsami/composer-custom-directory-installer": "^2"
   },
   "config": {
     "sort-packages": true,
     "allow-plugins": {
-      "mnsami/composer-custom-directory-installer": true
+      "mnsami/composer-custom-directory-installer": true,
+      "phpstan/extension-installer": true
     }
   },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "git@github.com:st-universe/assets.git"
+    }
+  ],
   "scripts": {
-    "tests": "@php vendor/bin/phpunit tests"
+    "tests": "@php vendor/bin/phpunit tests",
+    "stan": "phpstan",
+    "coverage": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html build/coverage tests",
+    "qa": [
+      "@composer tests",
+      "@composer stan"
+    ],
+    "gen:baseline": [
+      "phpstan --generate-baseline"
+    ]
+  },
+  "scripts-descriptions": {
+    "qa": "Executes alle qa related action",
+    "gen:baseline": "Generates the phpstan baseline"
   },
   "extra": {
     "installer-paths": {
@@ -29,11 +56,5 @@
         "st-universe/assets"
       ]
     }
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "git@github.com:st-universe/assets.git"
-    }
-  ]
+  }
 }
