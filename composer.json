@@ -1,5 +1,7 @@
 {
   "name": "st-universe/starsystem-generator",
+  "description": "ST-Universe Starsystem Generator Source Code",
+  "license": "MIT",
   "autoload": {
     "psr-4": {
       "Stu\\StarsystemGenerator\\": "src/StarsystemGenerator"
