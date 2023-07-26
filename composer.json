@@ -3,8 +3,16 @@
   "description": "ST-Universe Starsystem Generator Source Code",
   "license": "MIT",
   "autoload": {
+    "classmap": [
+      "tests/"
+    ],
     "psr-4": {
       "Stu\\StarsystemGenerator\\": "src/StarsystemGenerator"
+    },
+    "autoload-dev": {
+      "psr-4": {
+        "Stu\\StarsystemGenerator\\": "src/StarsystemGenerator"
+      }
     }
   },
   "require": {
