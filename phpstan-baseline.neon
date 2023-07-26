@@ -1,6 +1,56 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$allowedGrowthPercentage is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$asteroidProbabilities is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$hasAsteroids is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$hasMoons is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$hasPlanets is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$maxAsteroids is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$maxMoons is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$maxPlanets is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$moonProbabilities is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
+			message: "#^Property Stu\\\\StarsystemGenerator\\\\Config\\\\SystemConfiguration\\:\\:\\$planetProbabilities is never read, only written\\.$#"
+			count: 1
+			path: src/StarsystemGenerator/Config/SystemConfiguration.php
+
+		-
 			message: "#^Loose comparison using \\=\\= between 1 and 1 will always evaluate to true\\.$#"
 			count: 1
 			path: src/StarsystemGenerator/StarsystemGenerator.php
@@ -111,12 +161,12 @@ parameters:
 			path: src/StarsystemGenerator/StarsystemGenerator.php
 
 		-
-			message: "#^Method Stu\\\\StarsystemGenerator\\\\StarsystemGenerator\\:\\:generate\\(\\) has no return type specified\\.$#"
+			message: "#^Method Stu\\\\StarsystemGenerator\\\\StarsystemGenerator\\:\\:generateOld\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: src/StarsystemGenerator/StarsystemGenerator.php
 
 		-
-			message: "#^Method Stu\\\\StarsystemGenerator\\\\StarsystemGenerator\\:\\:generate\\(\\) has parameter \\$id with no type specified\\.$#"
+			message: "#^Method Stu\\\\StarsystemGenerator\\\\StarsystemGenerator\\:\\:generateOld\\(\\) has parameter \\$id with no type specified\\.$#"
 			count: 1
 			path: src/StarsystemGenerator/StarsystemGenerator.php
 
@@ -286,6 +336,6 @@ parameters:
 			path: src/StarsystemGenerator/StarsystemGeneratorInterface.php
 
 		-
-			message: "#^Method Stu\\\\StarsystemGenerator\\\\StarsystemGeneratorInterface\\:\\:generate\\(\\) has parameter \\$id with no type specified\\.$#"
+			message: "#^Parameter \\#1 \\$array of function array_walk is passed by reference, so it expects variables only\\.$#"
 			count: 1
-			path: src/StarsystemGenerator/StarsystemGeneratorInterface.php
+			path: src/StarsystemGenerator/SystemMapData.php

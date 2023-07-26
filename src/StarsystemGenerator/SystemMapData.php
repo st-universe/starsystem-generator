@@ -19,8 +19,25 @@ final class SystemMapData implements SystemMapDataInterface
         return $this;
     }
 
-    public function toString(): string
+    public function toString(bool $doPrint = false): string
     {
+        if ($doPrint) {
+            array_walk(
+                array_map(
+                    fn (array $row): string => implode(
+                        "&nbsp;&nbsp;",
+                        $row
+                    ),
+                    $this->fieldData
+                ),
+                function (string $row): void {
+                    echo $row . "<br>";
+                }
+            );
+
+            return '';
+        }
+
         return implode(
             "\n",
             array_map(

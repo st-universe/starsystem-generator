@@ -4,5 +4,5 @@ namespace Stu\StarsystemGenerator;
 
 interface StarsystemGeneratorInterface
 {
-    public function generate($id);
+    public function generate(int $systemType);
 }

@@ -2,6 +2,10 @@
 
 namespace Stu\StarsystemGenerator;
 
+use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
+use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
+use Stu\StarsystemGenerator\Exception\StarsystemGeneratorFileMissingException;
+
 final class StarsystemGenerator implements StarsystemGeneratorInterface
 {
 
@@ -32,6 +36,86 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
     public const NAME = 'name';
     public const PLANETS = 'planets';
 
+    private SizeGeneratorInterface $sizeGenerator;
+
+    public function __construct(SizeGeneratorInterface $sizeGenerator)
+    {
+        $this->sizeGenerator = $sizeGenerator;
+    }
+
+    /**
+     * - array aufbauen, size random
+     *      - array in Object, als Param in die einzelnen Generatoren rein
+     *      - 7 bis 27
+     * - anhand size -> stern / binär etc.
+     *      - von field_id in stu_map die beiden rechten Stellen
+     *          abschneiden um zur ID von stu_system_types zu kommen
+     *      - typen in stu_system_types
+     *      - gerade anzahl: 2x2, binäre
+     *      - ungerade: 1x1, 3x3, binäre
+     *      - bonusFelder random
+     *      - Name raussuchen stu_system_name
+     * - 0,1,2 ringe (abhängig von size)
+     *      - dichte, abhängig vom letzten Feld davor
+     *      - position
+     * - planeten verteilen
+     * - monde verteilen
+     * - Vorschau rendern
+     */
+
+    public function generate(int $systemType): SystemMapDataInterface
+    {
+        $config = $this->loadSystemTypeConfiguration($systemType);
+
+        $mapData = $this->sizeGenerator->generate($config);
+
+        return $mapData;
+    }
+
+    /**
+     * @throws StarsystemGeneratorFileMissingException
+     */
+    private function loadSystemTypeConfiguration(int $systemType): SystemConfigurationInterface
+    {
+        $fileName = sprintf(
+            '%s/Config/Data/%d.php',
+            __DIR__,
+            $systemType
+        );
+        if (!file_exists($fileName)) {
+            throw new StarsystemGeneratorFileMissingException('Systemgenerator description file missing for systemType ' . $systemType);
+        }
+        $requireResult = require $fileName;
+
+        if (is_bool($requireResult)) {
+            throw new StarsystemGeneratorFileMissingException('Error loading Systemgenerator description file for systemType ' . $systemType);
+        }
+
+        if (is_int($requireResult)) {
+            throw new StarsystemGeneratorFileMissingException('Error loading Systemgenerator description file for systemType ' . $systemType);
+        }
+
+        return $requireResult;
+    }
+
+    // NEUER CODE
+    function drawCircle(array &$array, $centerX, $centerY, $radius)
+    {
+        $width = count($array[0]);
+        $height = count($array);
+
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
+                $distance = sqrt(pow($x - $centerX, 2) + pow($y - $centerY, 2));
+                if ($distance <= $radius) {
+                    $array[$y][$x] = '*'; // Use '*' to mark the circle
+                }
+            }
+        }
+    }
+
+
+    //ALTER CODE
     private function draw($arr): int
     {
         $p = rand(1, 100);
@@ -205,9 +289,15 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
         $colfields[self::AFFX] = 0;
         $colfields[self::AFFY] = 0;
         for ($i = 0; $i < $phase[$p][self::NUM]; $i++) {
-            $arr = $this->getWeightingList($colfields, $phase[$p][self::MODE], $phase[$p][self::FROM],
-                $phase[$p][self::TO], $phase[$p][self::ADJACENT],
-                $phase[$p][self::NOADJACENT], $phase[$p][self::NOADJACENTLIMIT]);
+            $arr = $this->getWeightingList(
+                $colfields,
+                $phase[$p][self::MODE],
+                $phase[$p][self::FROM],
+                $phase[$p][self::TO],
+                $phase[$p][self::ADJACENT],
+                $phase[$p][self::NOADJACENT],
+                $phase[$p][self::NOADJACENTLIMIT]
+            );
             if (count($arr) == 0) {
                 break;
             }
@@ -222,7 +312,6 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
                     $ta[$t] = $phase[$p][self::TO][$c];
                     $t++;
                 }
-
             }
             if ($t > 0) {
                 $colfields[$field[self::X]][$field[self::Y]] = $ta[rand(0, $t - 1)];
@@ -267,7 +356,6 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
                 if ($fields[$i][$j] == 2) {
                     return true;
                 }
-
             }
         }
 
@@ -349,14 +437,15 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
             $c = $this->polarToXY($a, $distance);
             $star[3][self::X] = $c[self::X];
             $star[3][self::Y] = $c[self::Y];
-            while ($this->collides($star[0], $star[3]) || $this->collides($star[1],
-                    $star[3]) || $this->collides($star[2], $star[3])) {
+            while ($this->collides($star[0], $star[3]) || $this->collides(
+                $star[1],
+                $star[3]
+            ) || $this->collides($star[2], $star[3])) {
                 $distance++;
                 $c = $this->polarToXY($a, $distance);
                 $star[3][self::X] = $c[self::X];
                 $star[3][self::Y] = $c[self::Y];
             }
-
         }
 
 
@@ -465,7 +554,7 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
     }
 
 
-    public function generate($id)
+    public function generateOld($id)
     {
         list($star, $stars, $data, $zone, $belt, $belts) = require_once 'incSystems/' . $id . '.php';
 
@@ -587,7 +676,7 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
                 $bphase[2][self::NUM] = 200;
 
                 for ($p = 1; $p <= $bphases; $p++) {
-                    $fields = $this->doPhase(p, $bphase, $fields);
+                    $fields = $this->doPhase($p, $bphase, $fields);
                 }
 
                 $thincount = 0;
@@ -634,7 +723,6 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
                 $aphase[0][self::FRAGMENTATION] = $fragmentation;
 
                 $fields = $this->doPhase(0, $aphase, $fields);
-
             } else {
 
                 $bphase[1][self::FROM] = array("0" => $beltinner);
@@ -676,8 +764,6 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
                 $aphase[0][self::FRAGMENTATION] = $fragmentation;
 
                 $fields = $this->doPhase(0, $aphase, $fields);
-
-
             }
         }
 
@@ -796,15 +882,18 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
 
             for ($i = 1; $i <= $syswidth; $i++) {
                 for ($j = 1; $j <= $syswidth; $j++) {
-                    if (($fields[$i][$j] >= 100) && ($fields[$i][$j] <= 200) && (floor($this->distance($i, $j, $px,
-                                $py)) <= $moonradius + 2)) {
+                    if (($fields[$i][$j] >= 100) && ($fields[$i][$j] <= 200) && (floor($this->distance(
+                        $i,
+                        $j,
+                        $px,
+                        $py
+                    )) <= $moonradius + 2)) {
                         $fields[$i][$j] = 50;
                     }
                     if (($fields[$i][$j] == 50) && (ceil($this->distance($i, $j, $px, $py)) <= $moonradius)) {
                         $fields[$i][$j] = 60;
                         $mooncount++;
                     }
-
                 }
             }
             // mooncount
@@ -849,7 +938,6 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
                     if (($fields[$i][$j] >= 400) && ($fields[$i][$j] <= 499)) {
                         $fields[$i][$j] = 0;
                     }
-
                 }
             }
         }

@@ -1,11 +1,14 @@
 <?php
 
+use Stu\StarsystemGenerator\Component\SizeGenerator;
 use Stu\StarsystemGenerator\StarsystemGenerator;
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$starId = 901;
+$systemType = 1002;
 
-$systemGenerator = new StarsystemGenerator();
-$systemGenerator->generate($starId);
+$systemGenerator = new StarsystemGenerator(new SizeGenerator());
 
+$systemMapData = $systemGenerator->generate($systemType);
+
+echo $systemMapData->toString(true);
