@@ -12,9 +12,7 @@
       <directory>src</directory>
     </include>
     <exclude>
-      <directory suffix="services.php">src</directory>
-      <directory>src/Public</directory>
-      <directory>src/OrmProxy</directory>
+      <directory>src/Config/Data</directory>
     </exclude>
   </source>
   <testsuites>

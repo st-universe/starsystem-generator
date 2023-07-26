@@ -24,12 +24,9 @@
     </logging>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src/Component</directory>
-            <directory suffix=".php">src/Module</directory>
-            <directory suffix=".php">src/Lib</directory>
-            <directory suffix=".php">src/Orm</directory>
+            <directory suffix=".php">src</directory>
             <exclude>
-              <directory suffix="services.php">src</directory>
+              <directory>src/Config/Data</directory>
             </exclude>
         </whitelist>
     </filter>

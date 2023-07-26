@@ -12,7 +12,8 @@
   },
   "require-dev": {
     "bnf/phpstan-psr-container": "^1.0",
-    "phpunit/phpunit": "^10",
+    "jetbrains/phpstorm-stubs": "^2022.3",
+    "mnsami/composer-custom-directory-installer": "^2",
     "mockery/mockery": "^1.1",
     "phpstan/extension-installer": "^1.2",
     "phpstan/phpstan": "^1.9",
@@ -20,8 +21,8 @@
     "phpstan/phpstan-doctrine": "^1.3",
     "phpstan/phpstan-mockery": "^1.1",
     "phpstan/phpstan-phpunit": "^1.3",
-    "st-universe/assets": "dev-master",
-    "mnsami/composer-custom-directory-installer": "^2"
+    "phpunit/phpunit": "^10",
+    "st-universe/assets": "dev-master"
   },
   "config": {
     "sort-packages": true,
