@@ -9,7 +9,7 @@ final class SystemMapData implements SystemMapDataInterface
 
     public function __construct(int $width, int $height)
     {
-        $this->fieldData = array_fill(1, $height, array_fill(1, $width, '0'));
+        $this->fieldData = array_fill(1, $height, array_fill(1, $width, 0));
     }
 
     public function setFieldId(int $x, int $y, int $fieldId): SystemMapDataInterface
