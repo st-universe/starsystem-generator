@@ -100,7 +100,6 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
     {
         $list = new DirectoryIterator(__DIR__ . '/Config/Data');
 
-        /** @var SplFileInfo $file */
         foreach ($list as $file) {
             if (!$file->isDir()) {
                 yield (int) str_replace('.php', '', $file->getFilename());
