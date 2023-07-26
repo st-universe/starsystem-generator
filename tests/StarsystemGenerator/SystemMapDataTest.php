@@ -12,6 +12,10 @@ final class SystemMapDataTest extends MockeryTestCase
 
         $mapData->setFieldId(2, 1, 5);
 
-        $mapData->toString();
+        static::assertEquals(
+            "0,5,0\n"
+                . "0,0,0",
+            $mapData->toString()
+        );
     }
 }

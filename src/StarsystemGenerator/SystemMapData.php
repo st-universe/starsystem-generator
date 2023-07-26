@@ -19,10 +19,17 @@ final class SystemMapData implements SystemMapDataInterface
         return $this;
     }
 
-    public function toString(): void
+    public function toString(): string
     {
-        foreach (array_map(fn (array $row): string => implode(",", $row), $this->fieldData) as $row) {
-            echo $row . "\n";
-        }
+        return implode(
+            "\n",
+            array_map(
+                fn (array $row): string => implode(
+                    ",",
+                    $row
+                ),
+                $this->fieldData
+            )
+        );
     }
 }
