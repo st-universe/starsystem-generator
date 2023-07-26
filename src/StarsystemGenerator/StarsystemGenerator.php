@@ -2,6 +2,8 @@
 
 namespace Stu\StarsystemGenerator;
 
+use DirectoryIterator;
+use Generator;
 use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Exception\StarsystemGeneratorFileMissingException;
@@ -87,15 +89,23 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
         }
         $requireResult = require $fileName;
 
-        if (is_bool($requireResult)) {
-            throw new StarsystemGeneratorFileMissingException('Error loading Systemgenerator description file for systemType ' . $systemType);
-        }
-
-        if (is_int($requireResult)) {
+        if (!$requireResult instanceof SystemConfigurationInterface) {
             throw new StarsystemGeneratorFileMissingException('Error loading Systemgenerator description file for systemType ' . $systemType);
         }
 
         return $requireResult;
+    }
+
+    public function getSupportedSystemTypes(): Generator
+    {
+        $list = new DirectoryIterator(__DIR__ . '/Config/Data');
+
+        /** @var SplFileInfo $file */
+        foreach ($list as $file) {
+            if (!$file->isDir()) {
+                yield (int) str_replace('.php', '', $file->getFilename());
+            }
+        }
     }
 
     // NEUER CODE

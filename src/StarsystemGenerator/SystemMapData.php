@@ -19,6 +19,11 @@ final class SystemMapData implements SystemMapDataInterface
         return $this;
     }
 
+    public function getFieldData(): array
+    {
+        return array_merge_recursive(...$this->fieldData);
+    }
+
     public function toString(bool $doPrint = false): string
     {
         if ($doPrint) {

@@ -3,6 +3,7 @@
 namespace Stu\StarsystemGenerator;
 
 use Mockery\MockInterface;
+use Stu\StarsystemGenerator\Component\SizeGenerator;
 use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
 use Stu\StarsystemGenerator\Exception\StarsystemGeneratorFileMissingException;
 
@@ -22,11 +23,40 @@ final class StarsystemGeneratorTest extends StuTestCase
         );
     }
 
-    public function testGenerate(): void
+    public function testGenerateExpectExceptionWhenNoConfigFoundForSystemType(): void
     {
-        static::expectExceptionMessage('userId 42 tried to navigate from 41|41 to invalid position 42|42');
+        static::expectExceptionMessage('Systemgenerator description file missing for systemType 42');
         static::expectException(StarsystemGeneratorFileMissingException::class);
 
         $this->subject->generate(42);
+    }
+
+    public function testGenerateExpectExceptionWhen(): void
+    {
+        static::expectExceptionMessage('Error loading Systemgenerator description file for systemType 0');
+        static::expectException(StarsystemGeneratorFileMissingException::class);
+
+        $this->subject->generate(0);
+    }
+
+    public function testGenerateForAllSystemTypes(): void
+    {
+        $subject = new StarsystemGenerator(
+            new SizeGenerator()
+        );
+
+        $types = $this->subject->getSupportedSystemTypes();
+
+        foreach ($types as $type) {
+
+            //skip template
+            if ($type === 0) {
+                continue;
+            }
+
+            $result = $subject->generate($type);
+
+            $this->assertTrue(count($result->getFieldData()) >= 49);
+        }
     }
 }
