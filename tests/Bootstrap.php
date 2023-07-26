@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Stu;
+namespace Stu\StarsystemGenerator;
 
 use Mockery;
 
