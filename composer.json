@@ -33,7 +33,7 @@
   "repositories": [
     {
       "type": "git",
-      "url": "git@github.com:st-universe/assets.git"
+      "url": "https://github.com/st-universe/assets.git"
     }
   ],
   "scripts": {
