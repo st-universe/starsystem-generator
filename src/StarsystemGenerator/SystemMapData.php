@@ -2,56 +2,184 @@
 
 namespace Stu\StarsystemGenerator;
 
+use RuntimeException;
+use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+
+//TODO unit tests
 final class SystemMapData implements SystemMapDataInterface
 {
-    /** @var array<int, array<int, int>> */
+    private int $width;
+    private int $height;
+
+    /** @var array<int, int> */
     private array $fieldData;
+
+    /** @var array<int, bool> */
+    private array $blockedFields = [];
 
     public function __construct(int $width, int $height)
     {
-        $this->fieldData = array_fill(1, $height, array_fill(1, $width, 0));
+        $this->width = $width;
+        $this->height = $height;
+        $this->fieldData = array_fill(1, $height * $width, 0);
     }
 
-    public function setFieldId(int $x, int $y, int $fieldId): SystemMapDataInterface
+    public function getWidth(): int
     {
-        $this->fieldData[$y][$x] = $fieldId;
+        return $this->width;
+    }
+
+    public function getHeight(): int
+    {
+        return $this->height;
+    }
+
+    public function getFieldAmount(): int
+    {
+        return $this->getWidth() * $this->getHeight();
+    }
+
+    public function setFieldId(int $x, int $y, int $fieldId, int $fieldType): SystemMapDataInterface
+    {
+        $index = $x + ($y - 1) * $this->width;
+
+        if ($this->fieldData[$index] !== 0) {
+            throw new RuntimeException('already in use');
+        }
+
+        if (array_key_exists($index, $this->blockedFields)) {
+            throw new RuntimeException('field can not be used');
+        }
+
+        $this->fieldData[$index] = $fieldId;
+        $this->blockFields($x, $y, $fieldType <= FieldTypeEnum::PLANET, $fieldType);
 
         return $this;
     }
 
+    public function getAsteroidRing(int $radiusPercentage): array
+    {
+        return $this->getRing($radiusPercentage);
+    }
+
+
+    public function getPlanetDisplay(int $radiusPercentage, int $moonRange): ?array
+    {
+        $ring = $this->getRing($radiusPercentage);
+
+        shuffle($ring);
+
+        foreach ($ring as [$x, $y]) {
+            $displayFields = $this->getSurroundingFields($x, $y, $moonRange);
+
+            if ($this->areAllFieldsFree($displayFields)) {
+                return $displayFields;
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<int, array{0: int, 1:int}> $fields */
+    private function areAllFieldsFree(array $fields): bool
+    {
+        foreach ($fields as [$x, $y]) {
+            $index = $x + ($y - 1) * $this->width;
+
+            if ($this->fieldData[$index] !== 0) {
+                return false;
+            }
+
+            if (array_key_exists($index, $this->blockedFields)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** @return array<int, array{0: int, 1:int}> */
+    private function getRing(int $radiusPercentage): array
+    {
+        $result = [];
+
+        $radius = (int)($this->getWidth() / 2 * $radiusPercentage / 100);
+
+        $centerX = $this->getWidth() / 2;
+        $centerY = $this->getHeight() / 2;
+
+        foreach (range(1, $this->getHeight()) as $y) {
+            foreach (range(1, $this->getWidth()) as $x) {
+                $distance = (int)(sqrt(pow($x - $centerX, 2) + pow($y - $centerY, 2)));
+
+                if ($distance === $radius) {
+                    $result[] = [$x, $y];
+                }
+            }
+        }
+
+        return $result;
+    }
+
     public function getFieldData(): array
     {
-        return array_merge_recursive(...$this->fieldData);
+        return $this->fieldData;
     }
 
     public function toString(bool $doPrint = false): string
     {
         if ($doPrint) {
-            array_walk(
-                array_map(
-                    fn (array $row): string => implode(
-                        "&nbsp;&nbsp;",
-                        $row
-                    ),
-                    $this->fieldData
-                ),
-                function (string $row): void {
-                    echo $row . "<br>";
-                }
-            );
+            foreach (range(1, $this->getHeight()) as $y) {
+                echo implode(
+                    "&nbsp;&nbsp;",
+                    array_slice($this->fieldData, ($y - 1) * $this->getWidth(), $this->getWidth())
+                ) . "";
+            }
 
             return '';
         }
 
-        return implode(
-            "\n",
-            array_map(
-                fn (array $row): string => implode(
-                    ",",
-                    $row
-                ),
-                $this->fieldData
-            )
-        );
+        $result = '';
+        foreach (range(1, $this->getHeight()) as $y) {
+            $result .= implode(
+                ",",
+                array_slice($this->fieldData, ($y - 1) * $this->getWidth(), $this->getWidth())
+            ) . "\n";
+        }
+
+        return $result;
+    }
+
+    private function blockFields(int $x, int $y, bool $blockSurrounding, ?int $fieldType): void
+    {
+        if ($x < 1 || $x > $this->width || $y < 1 || $y > $this->height) {
+            return;
+        }
+
+        $index = $x + ($y - 1) * $this->width;
+        $this->blockedFields[$index] = true;
+
+        if ($blockSurrounding) {
+            $range = $fieldType === FieldTypeEnum::MASS_CENTER ? 2 : 1;
+
+            foreach ($this->getSurroundingFields($x, $y, $range) as [$x, $y]) {
+                $this->blockFields($x, $y, false, null);
+            }
+        }
+    }
+
+    /** @return array<int, array{0: int, 1:int}> */
+    private function getSurroundingFields(int $x, int $y, int $range): array
+    {
+        $result = [];
+
+        for ($i = $x - $range; $i <= $x + $range; $i++) {
+            for ($j = $y - $range; $j <= $y + $range; $j++) {
+                $index = $x + ($y - 1) * $this->width;
+                $result[$index] = [$i, $j];
+            }
+        }
+
+        return $result;
     }
 }

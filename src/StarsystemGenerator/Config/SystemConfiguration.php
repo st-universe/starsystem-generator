@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Stu\StarsystemGenerator\Config;
 
 use InvalidArgumentException;
-use Stu\StarsystemGenerator\Enum\ProbabilityTypeEnum;
+use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 
+//TODO unit tests
 final class SystemConfiguration implements SystemConfigurationInterface
 {
     // size
@@ -14,8 +15,8 @@ final class SystemConfiguration implements SystemConfigurationInterface
     private int $allowedGrowthPercentage = 0;
 
     // objects
-    private bool $hasPlanets = false;
-    private bool $hasMoons = false;
+    private bool $hasPlanets = true;
+    private bool $hasMoons = true;
     private bool $hasAsteroids = false;
 
     // object probabilities
@@ -30,6 +31,9 @@ final class SystemConfiguration implements SystemConfigurationInterface
     private int $maxMoons = PHP_INT_MAX;
     private int $maxAsteroids = PHP_INT_MAX;
 
+    private int $massCenterDistanceHorizontal = 2;
+    private int $massCenterDistanceVertical = 2;
+
     public function getMinSize(): int
     {
         return $this->minSize;
@@ -42,11 +46,21 @@ final class SystemConfiguration implements SystemConfigurationInterface
         return $this;
     }
 
+    public function getAllowedGrowthPercentage(): int
+    {
+        return $this->allowedGrowthPercentage;
+    }
+
     public function setAllowedGrowthPercentage(int $allowedGrowthPercentage): SystemConfigurationInterface
     {
         $this->allowedGrowthPercentage = $allowedGrowthPercentage;
 
         return $this;
+    }
+
+    public function hasPlanets(): bool
+    {
+        return $this->hasPlanets;
     }
 
     public function setHasPlanets(bool $hasPlanets): SystemConfigurationInterface
@@ -56,11 +70,21 @@ final class SystemConfiguration implements SystemConfigurationInterface
         return $this;
     }
 
+    public function hasMoons(): bool
+    {
+        return $this->hasMoons;
+    }
+
     public function setHasMoons(bool $hasMoons): SystemConfigurationInterface
     {
         $this->hasMoons = $hasMoons;
 
         return $this;
+    }
+
+    public function hasAsteroids(): bool
+    {
+        return $this->hasAsteroids;
     }
 
     public function setHasAsteroids(bool $hasAsteroids): SystemConfigurationInterface
@@ -72,21 +96,28 @@ final class SystemConfiguration implements SystemConfigurationInterface
 
     public function addPropability(int $type, int $percentage, int $probabilityType): SystemConfigurationInterface
     {
-        switch ($probabilityType) {
-            case ProbabilityTypeEnum::PLANET:
-                $this->planetProbabilities[$type] = $percentage;
-                break;
-            case ProbabilityTypeEnum::MOON:
-                $this->moonProbabilities[$type] = $percentage;
-                break;
-            case ProbabilityTypeEnum::ASTEROID:
-                $this->asteroidProbabilities[$type] = $percentage;
-                break;
-            default:
-                throw new InvalidArgumentException(sprintf('probabilityType %d is not supported', $probabilityType));
-        }
+        $this->getProbabilities($probabilityType)[$type] = $percentage;
 
         return $this;
+    }
+
+    public function getProbabilities(int $type): array
+    {
+        switch ($type) {
+            case FieldTypeEnum::PLANET:
+                return $this->planetProbabilities;
+            case FieldTypeEnum::MOON:
+                return $this->moonProbabilities;
+            case FieldTypeEnum::ASTEROID:
+                return $this->asteroidProbabilities;
+        }
+
+        throw new InvalidArgumentException(sprintf('probabilityType %d is not supported', $type));
+    }
+
+    public function getMaxPlanets(): int
+    {
+        return $this->maxPlanets;
     }
 
     public function setMaxPlanets(int $maxPlanets): SystemConfigurationInterface
@@ -96,6 +127,11 @@ final class SystemConfiguration implements SystemConfigurationInterface
         return $this;
     }
 
+    public function getMaxMoons(): int
+    {
+        return $this->maxMoons;
+    }
+
     public function setMaxMoons(int $maxMoons): SystemConfigurationInterface
     {
         $this->maxMoons = $maxMoons;
@@ -103,10 +139,25 @@ final class SystemConfiguration implements SystemConfigurationInterface
         return $this;
     }
 
+    public function getMaxAsteroids(): int
+    {
+        return $this->maxAsteroids;
+    }
+
     public function setMaxAsteroids(int $maxAsteroids): SystemConfigurationInterface
     {
         $this->maxAsteroids = $maxAsteroids;
 
         return $this;
+    }
+
+    public function getMassCenterDistanceHorizontal(): int
+    {
+        return $this->massCenterDistanceHorizontal;
+    }
+
+    public function getMassCenterDistanceVertical(): int
+    {
+        return $this->massCenterDistanceVertical;
     }
 }
