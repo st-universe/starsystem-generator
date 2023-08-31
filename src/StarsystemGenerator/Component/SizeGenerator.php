@@ -17,6 +17,8 @@ final class SizeGenerator implements SizeGeneratorInterface
 
     private function calculateSize(SystemConfigurationInterface $config): int
     {
-        return $config->getMinSize();
+        $allowedGrowthPercentage = $config->getAllowedGrowthPercentage();
+
+        return (int)($config->getMinSize() * (1 + random_int(0, $allowedGrowthPercentage) / 100));
     }
 }

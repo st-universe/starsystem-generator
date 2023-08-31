@@ -6,7 +6,15 @@ use Generator;
 
 interface StarsystemGeneratorInterface
 {
-    public function generate(int $systemType);
+    /**
+     * @param array<int, int> $firstMassCenterFields
+     * @param array<int, int>|null $secondMassCenterFields
+     */
+    public function generate(
+        int $systemType,
+        array $firstMassCenterFields,
+        ?array $secondMassCenterFields
+    ): SystemMapDataInterface;
 
     /**
      * @return Generator<int>

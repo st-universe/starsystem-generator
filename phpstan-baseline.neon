@@ -1,6 +1,2 @@
 parameters:
-	ignoreErrors:
-		-
-			message: "#^Parameter \\#1 \\$array of function array_walk is passed by reference, so it expects variables only\\.$#"
-			count: 1
-			path: src/StarsystemGenerator/SystemMapData.php
+	ignoreErrors: []
