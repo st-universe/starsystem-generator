@@ -54,7 +54,7 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
             throw new RuntimeException('no place found for planet');
         }
 
-        $planetAmount++;
+        $planetAmount--;
 
         [$centerX, $centerY] = $this->getCenterCoordinate($planetDisplay);
 
@@ -85,6 +85,7 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
     /** @param null|array{0: int, 1:int} $planetLocation */
     private function placeMoon(int &$moonAmount, ?array $planetLocation = null): void
     {
+        $moonAmount--;
     }
 
     private function getPlanetAmount(

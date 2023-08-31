@@ -67,6 +67,8 @@ final class SystemMapData implements SystemMapDataInterface
     {
         $ring = $this->getRing($radiusPercentage);
 
+        //echo print_r($ring, true);
+
         shuffle($ring);
 
         foreach ($ring as [$x, $y]) {
@@ -129,13 +131,22 @@ final class SystemMapData implements SystemMapDataInterface
     public function toString(bool $doPrint = false): string
     {
         if ($doPrint) {
+            echo "<table>";
             foreach (range(1, $this->getHeight()) as $y) {
+                echo "<tr>";
+
                 echo implode(
                     "&nbsp;&nbsp;",
-                    array_slice($this->fieldData, ($y - 1) * $this->getWidth(), $this->getWidth())
-                ) . "";
+                    array_map(
+                        fn (int $value) => sprintf('<td style="width: 30px; height: 30px; text-align: center;">%d</td>', $value),
+                        array_slice($this->fieldData, ($y - 1) * $this->getWidth(), $this->getWidth())
+                    )
+                );
+
+                echo "</tr>";
             }
 
+            echo "</table>";
             return '';
         }
 

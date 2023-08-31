@@ -4,6 +4,6 @@ use Stu\StarsystemGenerator\Config\SystemConfiguration;
 
 $config = new SystemConfiguration();
 
-$config->setAllowedGrowthPercentage(100);
+$config->setAllowedGrowthPercentage(300);
 
 return $config;
