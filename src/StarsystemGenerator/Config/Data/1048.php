@@ -14,11 +14,11 @@ $config->setHasMoons(true);
 
 $config->setHasAsteroids(true);
 
-$config->setMaxPlanets(16);
+$config->setMaxPlanets(8);
 
-$config->setMaxMoons(50);
+$config->setMaxMoons(15);
 
-$config->setMaxAsteroids(75);
+$config->setMaxAsteroids(40);
 
 
 

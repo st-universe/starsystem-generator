@@ -6,7 +6,7 @@ $config = new SystemConfiguration();
 
 $config->setAllowedGrowthPercentage(300);
 
-$config->setMinSize(24);
+$config->setMinSize(26);
 
 $config->setHasPlanets(true);
 
@@ -14,11 +14,11 @@ $config->setHasMoons(true);
 
 $config->setHasAsteroids(true);
 
-$config->setMaxPlanets(16);
+$config->setMaxPlanets(18);
 
-$config->setMaxMoons(50);
+$config->setMaxMoons(60);
 
-$config->setMaxAsteroids(75);
+$config->setMaxAsteroids(90);
 
 
 
