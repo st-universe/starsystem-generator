@@ -26,5 +26,5 @@ interface SystemMapDataInterface
     /** @return array<int, int> */
     public function getFieldData(): array;
 
-    public function toString(bool $doPrint = false): string;
+    public function toString(bool $doPrint = false, bool $showBlocked = false): string;
 }

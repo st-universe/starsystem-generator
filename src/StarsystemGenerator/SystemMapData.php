@@ -14,7 +14,7 @@ final class SystemMapData implements SystemMapDataInterface
     /** @var array<int, int> */
     private array $fieldData;
 
-    /** @var array<int, bool> */
+    /** @var array<int, int> */
     private array $blockedFields = [];
 
     public function __construct(int $width, int $height)
@@ -88,7 +88,7 @@ final class SystemMapData implements SystemMapDataInterface
         foreach ($fields as [$x, $y]) {
             $index = $x + ($y - 1) * $this->width;
 
-            if ($this->fieldData[$index] !== 0) {
+            if (array_key_exists($index, $this->fieldData)) {
                 return false;
             }
 
@@ -128,9 +128,12 @@ final class SystemMapData implements SystemMapDataInterface
         return $this->fieldData;
     }
 
-    public function toString(bool $doPrint = false): string
+    public function toString(bool $doPrint = false, bool $showBlocked = false): string
     {
+        $values = $showBlocked ? $this->blockedFields : $this->fieldData;
+
         if ($doPrint) {
+
             echo "<table>";
             foreach (range(1, $this->getHeight()) as $y) {
                 echo "<tr>";
@@ -139,7 +142,7 @@ final class SystemMapData implements SystemMapDataInterface
                     "&nbsp;&nbsp;",
                     array_map(
                         fn (int $value) => sprintf('<td style="width: 30px; height: 30px; text-align: center;">%d</td>', $value),
-                        array_slice($this->fieldData, ($y - 1) * $this->getWidth(), $this->getWidth())
+                        array_slice($values, ($y - 1) * $this->getWidth(), $this->getWidth())
                     )
                 );
 
@@ -154,7 +157,7 @@ final class SystemMapData implements SystemMapDataInterface
         foreach (range(1, $this->getHeight()) as $y) {
             $result .= implode(
                 ",",
-                array_slice($this->fieldData, ($y - 1) * $this->getWidth(), $this->getWidth())
+                array_slice($values, ($y - 1) * $this->getWidth(), $this->getWidth())
             ) . "\n";
         }
 
@@ -168,7 +171,7 @@ final class SystemMapData implements SystemMapDataInterface
         }
 
         $index = $x + ($y - 1) * $this->width;
-        $this->blockedFields[$index] = true;
+        $this->blockedFields[$index] = 1;
 
         if ($blockSurrounding) {
             $range = $fieldType === FieldTypeEnum::MASS_CENTER ? 2 : 1;
@@ -186,7 +189,7 @@ final class SystemMapData implements SystemMapDataInterface
 
         for ($i = $x - $range; $i <= $x + $range; $i++) {
             for ($j = $y - $range; $j <= $y + $range; $j++) {
-                $index = $x + ($y - 1) * $this->width;
+                $index = $i + ($j - 1) * $this->width;
                 $result[$index] = [$i, $j];
             }
         }
