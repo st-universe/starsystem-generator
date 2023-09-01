@@ -10,5 +10,5 @@ interface SizeGeneratorInterface
     /**
      * Generates the map data and initializes the size.
      */
-    public function generate(SystemConfigurationInterface $config): SystemMapDataInterface;
+    public function generate(SystemConfigurationInterface $config, bool $hasTwoMassCenters): SystemMapDataInterface;
 }

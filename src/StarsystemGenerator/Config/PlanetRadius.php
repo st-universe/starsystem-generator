@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Stu\StarsystemGenerator\Config;
 
 use RuntimeException;
+use Stu\StarsystemGenerator\Lib\StuRandom;
 
 final class PlanetRadius
 {
@@ -39,7 +40,7 @@ final class PlanetRadius
         363    =>     [70,    90]
     ];
 
-    public static function getRandomPlanetRadiusPercentage(int $planetType): int
+    public static function getRandomPlanetRadiusPercentage(int $planetType, StuRandom $stuRandom): int
     {
         if (!array_key_exists($planetType, self::PLANET_RADIUS_PERCENTAGE)) {
             throw new RuntimeException(sprintf('planet type %d is unknown', $planetType));
@@ -47,6 +48,6 @@ final class PlanetRadius
 
         [$min, $max] = self::PLANET_RADIUS_PERCENTAGE[$planetType];
 
-        return random_int($min, $max);
+        return $stuRandom->rand($min, $max, true);
     }
 }

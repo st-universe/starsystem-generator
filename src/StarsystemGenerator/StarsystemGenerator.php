@@ -56,7 +56,7 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
     {
         $config = $this->loadSystemTypeConfiguration->load($systemType);
 
-        $mapData = $this->sizeGenerator->generate($config);
+        $mapData = $this->sizeGenerator->generate($config, $secondMassCenterFields !== null);
 
         $this->massCenterGenerator->generate(
             $firstMassCenterFields,

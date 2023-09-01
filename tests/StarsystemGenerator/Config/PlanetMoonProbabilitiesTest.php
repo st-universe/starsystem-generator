@@ -18,7 +18,7 @@ final class PlanetMoonProbabilitiesTest extends StuTestCase
         $values = [];
 
         foreach (range(1, 2485) as $i) {
-            $random = $this->subject->pickRandomFieldId(null, true);
+            $random = $this->subject->pickRandomFieldId([], null, true);
 
             if (!array_key_exists($random, $values)) {
                 $values[$random] = 1;

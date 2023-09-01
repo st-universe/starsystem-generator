@@ -4,6 +4,7 @@ namespace Stu\StarsystemGenerator\Component;
 
 use InvalidArgumentException;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
+use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
 
@@ -65,8 +66,10 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
         $systemWidth = $mapData->getWidth();
         $systemHeight = $mapData->getHeight();
 
-        $xOffset = (int)($systemWidth - $overallWidth) / 2;
-        $yOffset = (int)($systemHeight - $overallHeight) / 2;
+        $xOffset = (int)(($systemWidth - $overallWidth) / 2);
+        $yOffset = (int)(($systemHeight - $overallHeight) / 2);
+
+        $mapFields = [];
 
         foreach ($fields as $key => $id) {
             $column = $key % $massCenterSize + 1;
@@ -80,7 +83,14 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
                 $y = $yOffset + $overallHeight - ($massCenterSize - $row);
             }
 
+            $mapFields[] = [$x, $y, $id];
+        }
+
+        foreach ($mapFields as [$x, $y, $id]) {
             $mapData->setFieldId($x, $y, $id, FieldTypeEnum::MASS_CENTER);
+        }
+        foreach ($mapFields as [$x, $y, $id]) {
+            $mapData->blockField($x, $y, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
         }
     }
 

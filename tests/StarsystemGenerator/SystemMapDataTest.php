@@ -3,6 +3,7 @@
 namespace Stu\StarsystemGenerator;
 
 use RuntimeException;
+use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 
 final class SystemMapDataTest extends StuTestCase
@@ -38,16 +39,12 @@ final class SystemMapDataTest extends StuTestCase
         $posX = 3;
         $posY = 3;
 
-        if ($x === $posX && $y === $posY) {
-            static::expectExceptionMessage('already in use');
-        } else {
-            static::expectExceptionMessage('field can not be used');
-        }
+        static::expectExceptionMessage('field can not be used');
         static::expectException(RuntimeException::class);
 
         $mapData = new SystemMapData(5, 5);
 
-        $mapData->setFieldId($posX, $posY, 5, FieldTypeEnum::PLANET);
+        $mapData->blockField($posX, $posY, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
 
         $mapData->setFieldId($x, $y, 42, 42);
     }
@@ -71,16 +68,12 @@ final class SystemMapDataTest extends StuTestCase
         $posX = 3;
         $posY = 3;
 
-        if ($x === $posX && $y === $posY) {
-            static::expectExceptionMessage('already in use');
-        } else {
-            static::expectExceptionMessage('field can not be used');
-        }
+        static::expectExceptionMessage('field can not be used');
         static::expectException(RuntimeException::class);
 
         $mapData = new SystemMapData(5, 5);
 
-        $mapData->setFieldId($posX, $posY, 5, FieldTypeEnum::MASS_CENTER);
+        $mapData->blockField($posX, $posY, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
 
         $mapData->setFieldId($x, $y, 42, 42);
     }
@@ -97,11 +90,12 @@ final class SystemMapDataTest extends StuTestCase
 
     public function testGetPlanetDisplay(): void
     {
-        $mapData = new SystemMapData(5, 5);
+        $mapData = new SystemMapData(10, 10);
 
-        $result = $mapData->getPlanetDisplay(100, 1);
+        $result = $mapData->getPlanetDisplay(50, 1);
 
-        echo print_r($result, true);
+        //echo print_r($result, true);
+        $this->assertEquals(9, count($result));
     }
 
     public function testToString(): void

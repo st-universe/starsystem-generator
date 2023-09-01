@@ -4,6 +4,7 @@ namespace Stu\StarsystemGenerator\Component;
 
 use InvalidArgumentException;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
+use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\StuTestCase;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
@@ -189,6 +190,9 @@ final class MassCenterGeneratorTest extends StuTestCase
                 if ($value !== 0) {
                     $mapData->shouldReceive('setFieldId')
                         ->with($column + 1, $row + 1, $value, FieldTypeEnum::MASS_CENTER)
+                        ->once();
+                    $mapData->shouldReceive('blockField')
+                        ->with($column + 1, $row + 1, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK)
                         ->once();
                 }
             }

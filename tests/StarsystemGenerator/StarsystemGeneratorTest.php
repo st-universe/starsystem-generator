@@ -15,6 +15,7 @@ use Stu\StarsystemGenerator\Component\SizeGenerator;
 use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
 use Stu\StarsystemGenerator\Config\PlanetMoonProbabilities;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
+use Stu\StarsystemGenerator\Lib\StuRandom;
 
 final class StarsystemGeneratorTest extends StuTestCase
 {
@@ -63,7 +64,7 @@ final class StarsystemGeneratorTest extends StuTestCase
             ->andReturn($config);
 
         $this->sizeGenerator->shouldReceive('generate')
-            ->with($config)
+            ->with($config, false)
             ->once()
             ->andReturn($mapData);
         $this->massCenterGenerator->shouldReceive('generate')
@@ -83,12 +84,14 @@ final class StarsystemGeneratorTest extends StuTestCase
 
     public function testGenerateForAllSystemTypes(): void
     {
+        $stuRandom = new StuRandom();
+
         $subject = new StarsystemGenerator(
             new LoadSystemConfiguration(),
-            new SizeGenerator(),
+            new SizeGenerator($stuRandom),
             new MassCenterGenerator(),
             new AsteroidRingGenerator(),
-            new PlanetMoonGenerator(new PlanetMoonProbabilities())
+            new PlanetMoonGenerator(new PlanetMoonProbabilities(), $stuRandom)
         );
 
         $types = $this->subject->getSupportedSystemTypes();

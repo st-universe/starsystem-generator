@@ -3,7 +3,9 @@
 namespace Stu\StarsystemGenerator;
 
 use RuntimeException;
+use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Lib\StuRandom;
 
 //TODO unit tests
 final class SystemMapData implements SystemMapDataInterface
@@ -21,7 +23,25 @@ final class SystemMapData implements SystemMapDataInterface
     {
         $this->width = $width;
         $this->height = $height;
-        $this->fieldData = array_fill(1, $height * $width, 0);
+        $this->fieldData = $this->initFieldArray(0);
+        $this->blockedFields = $this->initFieldArray(BlockedFieldTypeEnum::NOT_BLOCKED);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function initFieldArray(int $value): array
+    {
+        $result = [];
+
+        for ($y = 1; $y <= $this->height; $y++) {
+            for ($x = 1; $x <= $this->width; $x++) {
+                $index = $x + ($y - 1) * $this->width;
+                $result[$index] = $value;
+            }
+        }
+
+        return $result;
     }
 
     public function getWidth(): int
@@ -34,12 +54,22 @@ final class SystemMapData implements SystemMapDataInterface
         return $this->height;
     }
 
-    public function getFieldAmount(): int
+    public function getRandomPlanetAmount(StuRandom $stuRandom): int
+    {
+        return (int)($this->getFieldAmount() / $stuRandom->rand(36, 81, true));
+    }
+
+    public function getRandomMoonAmount(StuRandom $stuRandom): int
+    {
+        return (int)($this->getFieldAmount() / $stuRandom->rand(19, 62, true));
+    }
+
+    private function getFieldAmount(): int
     {
         return $this->getWidth() * $this->getHeight();
     }
 
-    public function setFieldId(int $x, int $y, int $fieldId, int $fieldType): SystemMapDataInterface
+    public function setFieldId(int $x, int $y, int $fieldId, int $fieldType, bool $allowSoftBlock = false): SystemMapDataInterface
     {
         $index = $x + ($y - 1) * $this->width;
 
@@ -47,12 +77,19 @@ final class SystemMapData implements SystemMapDataInterface
             throw new RuntimeException('already in use');
         }
 
-        if (array_key_exists($index, $this->blockedFields)) {
-            throw new RuntimeException('field can not be used');
+        $blockType = $this->blockedFields[$index];
+
+        if ($blockType === BlockedFieldTypeEnum::HARD_BLOCK) {
+            throw new RuntimeException('field can not be used, hard block');
+        }
+
+        if (!$allowSoftBlock && $blockType === BlockedFieldTypeEnum::SOFT_BLOCK) {
+            throw new RuntimeException('field can not be used, soft block');
         }
 
         $this->fieldData[$index] = $fieldId;
-        $this->blockFields($x, $y, $fieldType <= FieldTypeEnum::PLANET, $fieldType);
+
+        //echo sprintf('set: [%d, %d, %d]', $x, $y, $fieldId);
 
         return $this;
     }
@@ -71,11 +108,23 @@ final class SystemMapData implements SystemMapDataInterface
 
         shuffle($ring);
 
+        //echo print_r($this->fieldData, true);
+
         foreach ($ring as [$x, $y]) {
+            //echo sprintf('RP(%d,%d),', $x, $y);
             $displayFields = $this->getSurroundingFields($x, $y, $moonRange);
 
-            if ($this->areAllFieldsFree($displayFields)) {
+            //echo print_r($displayFields, true);
+
+            $index = $x + ($y - 1) * $this->width;
+
+            if ($this->blockedFields[$index] !== 0) {
+                //echo "IB";
+            } else if ($this->areAllFieldsUnused($displayFields)) {
+                //echo "SUCCESS";
                 return $displayFields;
+            } else {
+                //echo "USED";
             }
         }
 
@@ -83,16 +132,19 @@ final class SystemMapData implements SystemMapDataInterface
     }
 
     /** @param array<int, array{0: int, 1:int}> $fields */
-    private function areAllFieldsFree(array $fields): bool
+    private function areAllFieldsUnused(array $fields): bool
     {
+        //echo print_r($fields, true);
+
         foreach ($fields as [$x, $y]) {
             $index = $x + ($y - 1) * $this->width;
 
-            if (array_key_exists($index, $this->fieldData)) {
-                return false;
+            if (!array_key_exists($index, $this->fieldData)) {
+                continue;
             }
 
-            if (array_key_exists($index, $this->blockedFields)) {
+            if ($this->fieldData[$index] !== 0) {
+                //echo sprintf("false: %d,%d", $x, $y);
                 return false;
             }
         }
@@ -164,20 +216,27 @@ final class SystemMapData implements SystemMapDataInterface
         return $result;
     }
 
-    private function blockFields(int $x, int $y, bool $blockSurrounding, ?int $fieldType): void
+    public function blockField(int $x, int $y, bool $blockSurrounding, ?int $fieldType, int $blockType): void
     {
         if ($x < 1 || $x > $this->width || $y < 1 || $y > $this->height) {
             return;
         }
 
         $index = $x + ($y - 1) * $this->width;
-        $this->blockedFields[$index] = 1;
+
+        $this->blockedFields[$index] = $blockType;
 
         if ($blockSurrounding) {
             $range = $fieldType === FieldTypeEnum::MASS_CENTER ? 2 : 1;
 
             foreach ($this->getSurroundingFields($x, $y, $range) as [$x, $y]) {
-                $this->blockFields($x, $y, false, null);
+                $this->blockField(
+                    $x,
+                    $y,
+                    false,
+                    null,
+                    $fieldType === FieldTypeEnum::MASS_CENTER ? BlockedFieldTypeEnum::HARD_BLOCK : BlockedFieldTypeEnum::SOFT_BLOCK
+                );
             }
         }
     }
