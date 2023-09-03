@@ -30,7 +30,7 @@ final class SizeGenerator implements SizeGeneratorInterface
         $minIncrease = $hasTwoMassCenters ? (int)($allowedGrowthPercentage / 2) : 0;
 
         $size = (int)($config->getMinSize() * (1 + $this->stuRandom->rand($minIncrease, $allowedGrowthPercentage, true) / 100));
-        echo "size: " . $size;
+        //echo "size: " . $size;
 
         return $size;
     }

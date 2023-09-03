@@ -32,7 +32,7 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
 
         $planetAmount = $this->getPlanetAmount($mapData, $config);
 
-        echo sprintf(" planetAmount: %d<br>", $planetAmount);
+        //echo sprintf(" planetAmount: %d<br>", $planetAmount);
 
         $moonAmount = $this->getMoonAmount($mapData, $config);
 
