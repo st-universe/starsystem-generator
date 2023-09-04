@@ -14,6 +14,9 @@ use Stu\StarsystemGenerator\SystemMapDataInterface;
 
 final class PlanetPlacement implements PlanetPlacementInterface
 {
+    public const MAX_TRIED_PLANET_TYPES = 20;
+    public const MAX_RETRIES_PER_PLANET_TYPE = 5;
+
     private PlanetMoonProbabilitiesInterface $planetMoonProbabilities;
     private StuRandom $stuRandom;
 
@@ -32,7 +35,7 @@ final class PlanetPlacement implements PlanetPlacementInterface
     {
         $planetDisplay = null;
 
-        $maxTries = 20;
+        $maxTries = self::MAX_TRIED_PLANET_TYPES;
 
         $triedPlanetFieldIds = [];
 
@@ -55,7 +58,7 @@ final class PlanetPlacement implements PlanetPlacementInterface
 
         if ($planetDisplay === null) {
             $this->dumpBothDisplays($mapData);
-            throw new RuntimeException('could not place any of 20 colony classes');
+            throw new RuntimeException(sprintf('could not place any of %d colony classes', self::MAX_TRIED_PLANET_TYPES));
         }
 
         $planetAmount--;
@@ -88,18 +91,24 @@ final class PlanetPlacement implements PlanetPlacementInterface
         int $randomPlanetFieldId
     ): ?array {
 
-        $planetRadiusPercentage = PlanetRadius::getRandomPlanetRadiusPercentage($randomPlanetFieldId, $this->stuRandom);
         $planetMoonRange = PlanetMoonRange::getPlanetMoonRange($randomPlanetFieldId);
 
-        //echo sprintf('planetRadiusPercentage: %d, planetMoonRange: %d ', $planetRadiusPercentage, $planetMoonRange);
+        $planetDisplay = null;
 
-        $planetDisplay = $mapData->getPlanetDisplay(
-            $planetRadiusPercentage,
-            $planetMoonRange
-        );
+        $maxTries = self::MAX_RETRIES_PER_PLANET_TYPE;
+        while ($maxTries > 0) {
+            $planetRadiusPercentage = PlanetRadius::getRandomPlanetRadiusPercentage($randomPlanetFieldId, $this->stuRandom);
 
-        if ($planetDisplay === null) {
-            //echo sprintf("no display found for planet type: %d <br>", $randomPlanetFieldId);
+            $planetDisplay = $mapData->getPlanetDisplay(
+                $planetRadiusPercentage,
+                $planetMoonRange
+            );
+
+            if ($planetDisplay !== null) {
+                break;
+            }
+
+            $maxTries--;
         }
 
         return $planetDisplay;
