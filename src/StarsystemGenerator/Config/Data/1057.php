@@ -4,7 +4,7 @@ use Stu\StarsystemGenerator\Config\SystemConfiguration;
 
 $config = new SystemConfiguration();
 
-$config->setAllowedGrowthPercentage(300);
+$config->setAllowedGrowthPercentage(25);
 
 $config->setMinSize(21);
 

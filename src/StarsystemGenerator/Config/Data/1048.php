@@ -4,7 +4,7 @@ use Stu\StarsystemGenerator\Config\SystemConfiguration;
 
 $config = new SystemConfiguration();
 
-$config->setAllowedGrowthPercentage(300);
+$config->setAllowedGrowthPercentage(30);
 
 $config->setMinSize(24);
 
@@ -14,11 +14,11 @@ $config->setHasMoons(true);
 
 $config->setHasAsteroids(true);
 
-$config->setMaxPlanets(8);
+$config->setMaxPlanets(12);
 
-$config->setMaxMoons(15);
+$config->setMaxMoons(30);
 
-$config->setMaxAsteroids(40);
+$config->setMaxAsteroids(30);
 
 
 
