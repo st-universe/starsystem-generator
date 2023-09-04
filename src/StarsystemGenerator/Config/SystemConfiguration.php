@@ -27,6 +27,10 @@ final class SystemConfiguration implements SystemConfigurationInterface
     /** @var array<int, int> */
     private array $asteroidProbabilities = [];
 
+    // probability blacklists
+    /** @var array<int, array<int>> */
+    private array $probabilityBlacklists = [];
+
     private int $maxPlanets = PHP_INT_MAX;
     private int $maxMoons = PHP_INT_MAX;
     private int $maxAsteroids = PHP_INT_MAX;
@@ -113,6 +117,22 @@ final class SystemConfiguration implements SystemConfigurationInterface
         }
 
         throw new InvalidArgumentException(sprintf('probabilityType %d is not supported', $type));
+    }
+
+    public function getPropabilityBlacklist(int $type): array
+    {
+        if (!array_key_exists($type, $this->probabilityBlacklists)) {
+            return [];
+        }
+
+        return $this->probabilityBlacklists[$type];
+    }
+
+    public function setPropabilityBlacklist(int $type, array $blacklistTypes): SystemConfigurationInterface
+    {
+        $this->probabilityBlacklists[$type] = $blacklistTypes;
+
+        return $this;
     }
 
     public function getMaxPlanets(): int

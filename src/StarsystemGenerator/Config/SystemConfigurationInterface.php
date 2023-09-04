@@ -29,6 +29,12 @@ interface SystemConfigurationInterface
 
     public function addPropability(int $type, int $percentage, int $probabilityType): SystemConfigurationInterface;
 
+    /** @return array<int> */
+    public function getPropabilityBlacklist(int $type): array;
+
+    /** @param array<int> $blacklistTypes */
+    public function setPropabilityBlacklist(int $type, array $blacklistTypes): SystemConfigurationInterface;
+
     public function getMaxPlanets(): int;
 
     public function setMaxPlanets(int $maxPlanets): SystemConfigurationInterface;

@@ -51,10 +51,11 @@ final class PlanetMoonProbabilities implements PlanetMoonProbabilitiesInterface
 
     public function pickRandomFieldId(
         array $triedPlanetFieldIds,
-        array $customProbabilities = null,
+        array $customProbabilities,
+        array $probabilityBlacklist,
         bool $isMoon = false
     ): int {
-        if ($customProbabilities !== null && !empty($customProbabilities)) {
+        if (!empty($customProbabilities)) {
             $probabilities = $customProbabilities;
         } else {
             $probabilities = $isMoon ? static::MOON_PROBABILITIES : static::PLANET_PROBABILITIES;
@@ -62,7 +63,8 @@ final class PlanetMoonProbabilities implements PlanetMoonProbabilitiesInterface
 
         $probabilities = array_filter(
             $probabilities,
-            fn ($key) => !in_array($key, $triedPlanetFieldIds),
+            fn ($key) => !in_array($key, $triedPlanetFieldIds)
+                && !in_array($key, $probabilityBlacklist),
             ARRAY_FILTER_USE_KEY
         );
 

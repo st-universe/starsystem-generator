@@ -11,6 +11,7 @@ use Stu\StarsystemGenerator\Component\MassCenterGenerator;
 use Stu\StarsystemGenerator\Component\MassCenterGeneratorInterface;
 use Stu\StarsystemGenerator\Component\PlanetMoonGenerator;
 use Stu\StarsystemGenerator\Component\PlanetMoonGeneratorInterface;
+use Stu\StarsystemGenerator\Component\PlanetPlacement;
 use Stu\StarsystemGenerator\Component\SizeGenerator;
 use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
 use Stu\StarsystemGenerator\Config\PlanetMoonProbabilities;
@@ -91,7 +92,7 @@ final class StarsystemGeneratorTest extends StuTestCase
             new SizeGenerator($stuRandom),
             new MassCenterGenerator(),
             new AsteroidRingGenerator(),
-            new PlanetMoonGenerator(new PlanetMoonProbabilities(), $stuRandom)
+            new PlanetMoonGenerator(new PlanetPlacement(new PlanetMoonProbabilities(), $stuRandom), $stuRandom)
         );
 
         $types = $this->subject->getSupportedSystemTypes();
