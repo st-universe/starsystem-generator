@@ -3,6 +3,7 @@
 namespace Stu\StarsystemGenerator\Component;
 
 use InvalidArgumentException;
+use Mockery;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
@@ -191,12 +192,12 @@ final class MassCenterGeneratorTest extends StuTestCase
                     $mapData->shouldReceive('setFieldId')
                         ->with($column + 1, $row + 1, $value, FieldTypeEnum::MASS_CENTER)
                         ->once();
-                    $mapData->shouldReceive('blockField')
-                        ->with($column + 1, $row + 1, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK)
-                        ->once();
                 }
             }
         }
+
+        $mapData->shouldReceive('blockField')
+            ->with(Mockery::any(), Mockery::any(), true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
 
         $this->subject->generate(
             $firstMassCenterFields,
@@ -205,15 +206,4 @@ final class MassCenterGeneratorTest extends StuTestCase
             $config
         );
     }
-
-    /**
-     *   $config->shouldReceive('getMassCenterDistanceHorizontal')
-            ->withNoArgs()
-            ->once()
-            ->andReturn($distanceX);
-        $config->shouldReceive('getMassCenterDistanceVertical')
-            ->withNoArgs()
-            ->once()
-            ->andReturn($distanceY);
-     */
 }

@@ -33,7 +33,7 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
             $config
         );
 
-        $this->placeMassCenter(
+        $placedFields = $this->placeMassCenter(
             $firstMassCenterFields,
             $firstMassCenterSize,
             $overallWidth,
@@ -42,19 +42,132 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
             $mapData
         );
 
+
         if ($secondMassCenterFields !== null) {
-            $this->placeMassCenter(
+            $placedFields = array_merge($placedFields, $this->placeMassCenter(
                 $secondMassCenterFields,
                 $secondMassCenterSize,
                 $overallWidth,
                 $overallHeight,
                 false,
                 $mapData
-            );
+            ));
+        }
+
+        $this->checkForBlockFields($placedFields, $mapData);
+    }
+
+    /**
+     * @param array<array{0: int, 1: int, 2: int}> $polygon
+     */
+    private function checkForBlockFields(array $polygon, SystemMapDataInterface $mapData): void
+    {
+        $convexHull = $this->calculateConvexHull($polygon);
+
+        for ($y = 1; $y <= $mapData->getHeight(); $y++) {
+            for ($x = 1; $x <= $mapData->getWidth(); $x++) {
+                if ($this->isPointInsidePolygon($x, $y, $convexHull)) {
+                    $mapData->blockField($x, $y, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
+                }
+            }
         }
     }
 
-    /** @param array<int, int> $fields */
+    /**
+     * @param array<array{0: int, 1: int, 2: int}> $coordinates
+     * 
+     * @return array<array{0: int, 1:int}>
+     */
+    private function calculateConvexHull(array $coordinates): array
+    {
+        // Sort coordinates by their x and y values
+        usort($coordinates, function ($a, $b) {
+            if ($a[0] == $b[0]) {
+                return $a[1] - $b[1];
+            }
+            return $a[0] - $b[0];
+        });
+
+        // Initialize upper and lower hulls
+        /** @var array<array{0: int, 1: int}> */
+        $upperHull = [];
+
+        /** @var array<array{0: int, 1: int}> */
+        $lowerHull = [];
+
+        // Compute the upper hull
+        foreach ($coordinates as $coord) {
+            while (
+                count($upperHull) >= 2 &&
+                $this->crossProduct($upperHull[count($upperHull) - 2], $upperHull[count($upperHull) - 1], $coord) <= 0
+            ) {
+                array_pop($upperHull);
+            }
+            $upperHull[] = [$coord[0], $coord[1]];
+        }
+
+        // Compute the lower hull
+        foreach (array_reverse($coordinates) as $coord) {
+            while (
+                count($lowerHull) >= 2 &&
+                $this->crossProduct($lowerHull[count($lowerHull) - 2], $lowerHull[count($lowerHull) - 1], $coord) <= 0
+            ) {
+                array_pop($lowerHull);
+            }
+            $lowerHull[] = [$coord[0], $coord[1]];
+        }
+
+        // Remove duplicate points between upper and lower hulls
+        array_pop($upperHull);
+        array_pop($lowerHull);
+
+        // Combine upper and lower hulls to get the convex hull
+        $convexHull = array_merge($upperHull, $lowerHull);
+
+        return $convexHull;
+    }
+
+    /**
+     * @param array{0: int, 1: int} $a
+     * @param array{0: int, 1: int} $b
+     * @param array{0: int, 1: int, 2: int} $c
+     */
+    private function crossProduct($a, $b, $c): int
+    {
+        return ($b[0] - $a[0]) * ($c[1] - $a[1]) - ($b[1] - $a[1]) * ($c[0] - $a[0]);
+    }
+
+
+    /**
+     * @param array<array{0: int, 1: int}> $polygon
+     */
+    private function isPointInsidePolygon(int $x, int $y, array $polygon): bool
+    {
+        $inside = false;
+        $count = count($polygon);
+
+        for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
+            $xi = $polygon[$i][0];
+            $yi = $polygon[$i][1];
+            $xj = $polygon[$j][0];
+            $yj = $polygon[$j][1];
+
+            $intersect = (($yi > $y) != ($yj > $y))
+                && ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi);
+
+            if ($intersect) {
+                $inside = !$inside;
+            }
+        }
+
+        return $inside;
+    }
+
+    /** 
+     * @param array<int, int> $fields 
+     * 
+     * @return array<array{0: int, 1: int, 2: int}>
+     * */
     private function placeMassCenter(
         array $fields,
         int $massCenterSize,
@@ -62,7 +175,7 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
         int $overallHeight,
         bool $isFirstMassCenter,
         SystemMapDataInterface $mapData
-    ): void {
+    ): array {
         $systemWidth = $mapData->getWidth();
         $systemHeight = $mapData->getHeight();
 
@@ -89,9 +202,8 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
         foreach ($mapFields as [$x, $y, $id]) {
             $mapData->setFieldId($x, $y, $id, FieldTypeEnum::MASS_CENTER);
         }
-        foreach ($mapFields as [$x, $y, $id]) {
-            $mapData->blockField($x, $y, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
-        }
+
+        return $mapFields;
     }
 
     /** @param array<int, int>|null $fields */

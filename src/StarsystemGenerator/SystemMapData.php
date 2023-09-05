@@ -118,7 +118,7 @@ final class SystemMapData implements SystemMapDataInterface
 
             $index = $x + ($y - 1) * $this->width;
 
-            if ($this->blockedFields[$index] !== 0) {
+            if ($this->blockedFields[$index] !== BlockedFieldTypeEnum::NOT_BLOCKED) {
                 //echo "IB";
             } else if ($this->areAllFieldsUnused($displayFields)) {
                 //echo "SUCCESS";
@@ -224,7 +224,9 @@ final class SystemMapData implements SystemMapDataInterface
 
         $index = $x + ($y - 1) * $this->width;
 
-        $this->blockedFields[$index] = $blockType;
+        if ($this->blockedFields[$index] < $blockType) {
+            $this->blockedFields[$index] = $blockType;
+        }
 
         if ($blockSurrounding) {
             $range = $fieldType === FieldTypeEnum::MASS_CENTER ? 2 : 1;
