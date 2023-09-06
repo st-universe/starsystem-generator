@@ -5,6 +5,7 @@ namespace Stu\StarsystemGenerator;
 use RuntimeException;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
 use Stu\StarsystemGenerator\Lib\Field;
 use Stu\StarsystemGenerator\Lib\Point;
 
@@ -71,7 +72,7 @@ final class SystemMapDataTest extends StuTestCase
         $posY = 3;
 
         static::expectExceptionMessage('field can not be used');
-        static::expectException(RuntimeException::class);
+        static::expectException(HardBlockedFieldException::class);
 
         $mapData = new SystemMapData(5, 5);
 
@@ -87,8 +88,14 @@ final class SystemMapDataTest extends StuTestCase
         $result = $mapData->getAsteroidRing(50);
 
         $this->assertEquals([
-            new Point(2, 1), new Point(3, 1),
-            new Point(1, 2), new Point(4, 2), new Point(1, 3), new Point(4, 3), new Point(2, 4), new Point(3, 4)
+            0 => new Point(2, 1),
+            45 => new Point(3, 1),
+            90 => new Point(4, 2),
+            117 => new Point(4, 3),
+            153 => new Point(3, 4),
+            180 => new Point(2, 4),
+            225 => new Point(1, 3),
+            270 => new Point(1, 2),
         ], $result);
     }
 

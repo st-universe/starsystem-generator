@@ -72,7 +72,7 @@ final class StarsystemGeneratorTest extends StuTestCase
             ->with([], null, $mapData, $config)
             ->once();
         $this->asteroidRingGenerator->shouldReceive('generate')
-            ->with($mapData, $config)
+            ->with($mapData, $config, 0, 0)
             ->once();
         $this->planetMoonGenerator->shouldReceive('generate')
             ->with($mapData, $config)
@@ -85,15 +85,7 @@ final class StarsystemGeneratorTest extends StuTestCase
 
     public function testGenerateForAllSystemTypes(): void
     {
-        $stuRandom = new StuRandom();
-
-        $subject = new StarsystemGenerator(
-            new LoadSystemConfiguration(),
-            new SizeGenerator($stuRandom),
-            new MassCenterGenerator(),
-            new AsteroidRingGenerator(),
-            new PlanetMoonGenerator(new PlanetPlacement(new PlanetMoonProbabilities(), $stuRandom), $stuRandom)
-        );
+        $subject = StarsystemGenerator::getInstance();
 
         $types = $this->subject->getSupportedSystemTypes();
 

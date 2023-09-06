@@ -40,13 +40,15 @@ final class PlanetRadius
         363    =>     [70,    90]
     ];
 
-    public static function getRandomPlanetRadiusPercentage(int $planetType, StuRandom $stuRandom): int
+    public static function getRandomPlanetRadiusPercentage(int $planetType, StuRandom $stuRandom, bool $isDwarfPlanet = false): int
     {
-        if (!array_key_exists($planetType, self::PLANET_RADIUS_PERCENTAGE)) {
-            throw new RuntimeException(sprintf('planet type %d is unknown', $planetType));
+        $type = $isDwarfPlanet ? $planetType - 200 : $planetType;
+
+        if (!array_key_exists($type, self::PLANET_RADIUS_PERCENTAGE)) {
+            throw new RuntimeException(sprintf('planet type %d is unknown', $type));
         }
 
-        [$min, $max] = self::PLANET_RADIUS_PERCENTAGE[$planetType];
+        [$min, $max] = self::PLANET_RADIUS_PERCENTAGE[$type];
 
         return $stuRandom->rand($min, $max, true);
     }

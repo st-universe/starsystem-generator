@@ -4,11 +4,20 @@ namespace Stu\StarsystemGenerator;
 
 use DirectoryIterator;
 use Generator;
+use Stu\StarsystemGenerator\Component\AsteroidRingGenerator;
 use Stu\StarsystemGenerator\Component\AsteroidRingGeneratorInterface;
+use Stu\StarsystemGenerator\Component\LoadSystemConfiguration;
 use Stu\StarsystemGenerator\Component\LoadSystemConfigurationInterface;
+use Stu\StarsystemGenerator\Component\MassCenterGenerator;
 use Stu\StarsystemGenerator\Component\MassCenterGeneratorInterface;
+use Stu\StarsystemGenerator\Component\MoonPlacement;
+use Stu\StarsystemGenerator\Component\PlanetMoonGenerator;
 use Stu\StarsystemGenerator\Component\PlanetMoonGeneratorInterface;
+use Stu\StarsystemGenerator\Component\PlanetPlacement;
+use Stu\StarsystemGenerator\Component\SizeGenerator;
 use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
+use Stu\StarsystemGenerator\Config\PlanetMoonProbabilities;
+use Stu\StarsystemGenerator\Lib\StuRandom;
 
 final class StarsystemGenerator implements StarsystemGeneratorInterface
 {
@@ -30,6 +39,24 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
         $this->massCenterGenerator = $massCenterGenerator;
         $this->asteroidRingGenerator = $asteroidRingGenerator;
         $this->planetMoonGenerator = $planetMoonGenerator;
+    }
+
+    public static function getInstance(): StarsystemGeneratorInterface
+    {
+        $planetMoonProbabilities = new PlanetMoonProbabilities();
+        $stuRandom = new StuRandom();
+
+        return new StarsystemGenerator(
+            new LoadSystemConfiguration(),
+            new SizeGenerator($stuRandom),
+            new MassCenterGenerator(),
+            new AsteroidRingGenerator($stuRandom),
+            new PlanetMoonGenerator(
+                new PlanetPlacement($planetMoonProbabilities, $stuRandom),
+                new MoonPlacement($planetMoonProbabilities, $stuRandom),
+                $stuRandom
+            )
+        );
     }
 
     /**
@@ -65,7 +92,12 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
             $config
         );
 
-        $this->asteroidRingGenerator->generate($mapData, $config);
+        $this->asteroidRingGenerator->generate(
+            $mapData,
+            $config,
+            count($firstMassCenterFields),
+            $secondMassCenterFields === null ? 0 : count($secondMassCenterFields)
+        );
         $this->planetMoonGenerator->generate($mapData, $config);
 
         return $mapData;

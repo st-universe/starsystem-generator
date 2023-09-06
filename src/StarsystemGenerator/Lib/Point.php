@@ -32,4 +32,9 @@ class Point implements PointInterface
     {
         return new Point($this->getX() + 1, $this->getY());
     }
+
+    public function __toString(): string
+    {
+        return sprintf('(%d, %d)', $this->getX(), $this->getY());
+    }
 }

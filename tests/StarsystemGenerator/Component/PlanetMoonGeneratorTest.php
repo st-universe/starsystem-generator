@@ -14,6 +14,9 @@ final class PlanetMoonGeneratorTest extends StuTestCase
     /** @var MockInterface|PlanetPlacementInterface  */
     private MockInterface $planetPlacement;
 
+    /** @var MockInterface|MoonPlacementInterface  */
+    private MockInterface $moonPlacement;
+
     /** @var MockInterface|StuRandom  */
     private MockInterface $stuRandom;
 
@@ -28,11 +31,16 @@ final class PlanetMoonGeneratorTest extends StuTestCase
     public function setUp(): void
     {
         $this->planetPlacement = $this->mock(PlanetPlacementInterface::class);
+        $this->moonPlacement = $this->mock(MoonPlacementInterface::class);
         $this->stuRandom = $this->mock(StuRandom::class);
         $this->mapData = $this->mock(SystemMapDataInterface::class);
         $this->config = $this->mock(SystemConfigurationInterface::class);
 
-        $this->subject = new PlanetMoonGenerator($this->planetPlacement, $this->stuRandom);
+        $this->subject = new PlanetMoonGenerator(
+            $this->planetPlacement,
+            $this->moonPlacement,
+            $this->stuRandom
+        );
     }
 
     public function testGenerate(): void

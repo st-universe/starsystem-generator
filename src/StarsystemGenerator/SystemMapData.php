@@ -5,7 +5,11 @@ namespace Stu\StarsystemGenerator;
 use RuntimeException;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
+use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
+use Stu\StarsystemGenerator\Exception\UnknownFieldIndexException;
 use Stu\StarsystemGenerator\Lib\FieldInterface;
+use Stu\StarsystemGenerator\Lib\GeometryCalculations;
 use Stu\StarsystemGenerator\Lib\Point;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
@@ -81,14 +85,18 @@ final class SystemMapData implements SystemMapDataInterface
     {
         $index = $this->getFieldIndex($field->getPoint());
 
+        if (!array_key_exists($index, $this->fieldData)) {
+            throw new UnknownFieldIndexException(sprintf('index %d is unknown', $index));
+        }
+
         if ($this->fieldData[$index] !== 0) {
-            throw new RuntimeException('already in use');
+            throw new FieldAlreadyUsedException('already in use');
         }
 
         $blockType = $this->blockedFields[$index];
 
         if ($blockType === BlockedFieldTypeEnum::HARD_BLOCK) {
-            throw new RuntimeException('field can not be used, hard block');
+            throw new HardBlockedFieldException('field can not be used, hard block');
         }
 
         if (!$allowSoftBlock && $blockType === BlockedFieldTypeEnum::SOFT_BLOCK) {
@@ -102,6 +110,7 @@ final class SystemMapData implements SystemMapDataInterface
 
     public function getAsteroidRing(int $radiusPercentage): array
     {
+        // TODO twin rings to be thicker?
         return $this->getRing($radiusPercentage);
     }
 
@@ -161,12 +170,18 @@ final class SystemMapData implements SystemMapDataInterface
         $centerX = $this->getWidth() / 2;
         $centerY = $this->getHeight() / 2;
 
+        $centerPoint = new Point($centerX, $centerY);
+        $topCenterPoint = new Point($centerX, 0);
+
+        $verticalVector = [$centerPoint, $topCenterPoint];
+
         foreach (range(1, $this->getHeight()) as $y) {
             foreach (range(1, $this->getWidth()) as $x) {
                 $distance = (int)(sqrt(pow($x - $centerX, 2) + pow($y - $centerY, 2)));
 
                 if ($distance === $radius) {
-                    $result[] = new Point($x, $y);
+                    $angle = GeometryCalculations::calculateAngleBetweenVectors($verticalVector, [$centerPoint, new Point($x, $y)]);
+                    $result[$angle] = new Point($x, $y);
                 }
             }
         }
@@ -254,8 +269,7 @@ final class SystemMapData implements SystemMapDataInterface
 
         for ($i = $x - $range; $i <= $x + $range; $i++) {
             for ($j = $y - $range; $j <= $y + $range; $j++) {
-                $index = $i + ($j - 1) * $this->width;
-                $result[$index] = new Point($i, $j);
+                $result[] = new Point($i, $j);
             }
         }
 

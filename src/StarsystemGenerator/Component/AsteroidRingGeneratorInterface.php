@@ -12,6 +12,8 @@ interface AsteroidRingGeneratorInterface
      */
     public function generate(
         SystemMapDataInterface $mapData,
-        SystemConfigurationInterface $config
+        SystemConfigurationInterface $config,
+        int $firstMassCenterWidth,
+        int $secondMassCenterWidth
     ): void;
 }
