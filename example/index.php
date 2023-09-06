@@ -8,7 +8,7 @@ $systemType = 1002;
 
 $systemGenerator = StarsystemGenerator::getInstance();
 
-$systemMapData = $systemGenerator->generate($systemType, [5, 5, 5, 5], null); //, [6, 6, 6, 6, 6, 6, 6, 6, 6]);
+$systemMapData = $systemGenerator->generate($systemType, [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5], [6, 6, 6, 6, 6, 6, 6, 6, 6]);
 
 echo "<br> MAP <br>";
 echo $systemMapData->toString(true);

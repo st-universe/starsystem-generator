@@ -2,7 +2,6 @@
 
 namespace Stu\StarsystemGenerator\Component;
 
-use RuntimeException;
 use Stu\StarsystemGenerator\Config\PlanetMoonProbabilitiesInterface;
 use Stu\StarsystemGenerator\Config\PlanetRadius;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
@@ -71,7 +70,6 @@ final class MoonPlacement implements MoonPlacementInterface
         }
 
         if ($maxTries === 0) {
-            $this->dumpBothDisplays($mapData);
             throw new DisplayNotSuitableForMoonException('could not place the moon');
         }
 
@@ -101,14 +99,5 @@ final class MoonPlacement implements MoonPlacementInterface
         $current = current($location);
 
         return $current === false ? null : $current;
-    }
-
-    private function dumpBothDisplays(SystemMapDataInterface $mapData): void
-    {
-        echo "FAIL";
-        echo "<br>";
-        echo $mapData->toString(true);
-        echo "<br>";
-        echo $mapData->toString(true, true);
     }
 }
