@@ -5,6 +5,9 @@ namespace Stu\StarsystemGenerator;
 use RuntimeException;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Lib\FieldInterface;
+use Stu\StarsystemGenerator\Lib\Point;
+use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 
 //TODO unit tests
@@ -69,9 +72,14 @@ final class SystemMapData implements SystemMapDataInterface
         return $this->getWidth() * $this->getHeight();
     }
 
-    public function setFieldId(int $x, int $y, int $fieldId, int $fieldType, bool $allowSoftBlock = false): SystemMapDataInterface
+    private function getFieldIndex(PointInterface $point): int
     {
-        $index = $x + ($y - 1) * $this->width;
+        return $point->getX() + ($point->getY() - 1) * $this->width;
+    }
+
+    public function setField(FieldInterface $field, bool $allowSoftBlock = false): SystemMapDataInterface
+    {
+        $index = $this->getFieldIndex($field->getPoint());
 
         if ($this->fieldData[$index] !== 0) {
             throw new RuntimeException('already in use');
@@ -87,9 +95,7 @@ final class SystemMapData implements SystemMapDataInterface
             throw new RuntimeException('field can not be used, soft block');
         }
 
-        $this->fieldData[$index] = $fieldId;
-
-        //echo sprintf('set: [%d, %d, %d]', $x, $y, $fieldId);
+        $this->fieldData[$index] = $field->getId();
 
         return $this;
     }
@@ -104,25 +110,18 @@ final class SystemMapData implements SystemMapDataInterface
     {
         $ring = $this->getRing($radiusPercentage);
 
-        //echo print_r($ring, true);
-
         shuffle($ring);
 
-        //echo print_r($this->fieldData, true);
+        foreach ($ring as $point) {
+            $displayPoints = $this->getSurroundingPoints($point, $moonRange);
 
-        foreach ($ring as [$x, $y]) {
-            //echo sprintf('RP(%d,%d),', $x, $y);
-            $displayFields = $this->getSurroundingFields($x, $y, $moonRange);
-
-            //echo print_r($displayFields, true);
-
-            $index = $x + ($y - 1) * $this->width;
+            $index = $this->getFieldIndex($point);
 
             if ($this->blockedFields[$index] !== BlockedFieldTypeEnum::NOT_BLOCKED) {
                 //echo "IB";
-            } else if ($this->areAllFieldsUnused($displayFields)) {
+            } else if ($this->areAllPointsUnused($displayPoints)) {
                 //echo "SUCCESS";
-                return $displayFields;
+                return $displayPoints;
             } else {
                 //echo "USED";
             }
@@ -131,13 +130,13 @@ final class SystemMapData implements SystemMapDataInterface
         return null;
     }
 
-    /** @param array<int, array{0: int, 1:int}> $fields */
-    private function areAllFieldsUnused(array $fields): bool
+    /** @param array<int, PointInterface> $points */
+    private function areAllPointsUnused(array $points): bool
     {
         //echo print_r($fields, true);
 
-        foreach ($fields as [$x, $y]) {
-            $index = $x + ($y - 1) * $this->width;
+        foreach ($points as $point) {
+            $index = $this->getFieldIndex($point);
 
             if (!array_key_exists($index, $this->fieldData)) {
                 continue;
@@ -152,7 +151,7 @@ final class SystemMapData implements SystemMapDataInterface
         return true;
     }
 
-    /** @return array<int, array{0: int, 1:int}> */
+    /** @return array<PointInterface> */
     private function getRing(int $radiusPercentage): array
     {
         $result = [];
@@ -167,7 +166,7 @@ final class SystemMapData implements SystemMapDataInterface
                 $distance = (int)(sqrt(pow($x - $centerX, 2) + pow($y - $centerY, 2)));
 
                 if ($distance === $radius) {
-                    $result[] = [$x, $y];
+                    $result[] = new Point($x, $y);
                 }
             }
         }
@@ -216,13 +215,16 @@ final class SystemMapData implements SystemMapDataInterface
         return $result;
     }
 
-    public function blockField(int $x, int $y, bool $blockSurrounding, ?int $fieldType, int $blockType): void
+    public function blockField(PointInterface $point, bool $blockSurrounding, ?int $fieldType, int $blockType): void
     {
+        $x = $point->getX();
+        $y = $point->getY();
+
         if ($x < 1 || $x > $this->width || $y < 1 || $y > $this->height) {
             return;
         }
 
-        $index = $x + ($y - 1) * $this->width;
+        $index = $this->getFieldIndex($point);
 
         if ($this->blockedFields[$index] < $blockType) {
             $this->blockedFields[$index] = $blockType;
@@ -231,10 +233,9 @@ final class SystemMapData implements SystemMapDataInterface
         if ($blockSurrounding) {
             $range = $fieldType === FieldTypeEnum::MASS_CENTER ? 2 : 1;
 
-            foreach ($this->getSurroundingFields($x, $y, $range) as [$x, $y]) {
+            foreach ($this->getSurroundingPoints($point, $range) as $point) {
                 $this->blockField(
-                    $x,
-                    $y,
+                    $point,
                     false,
                     null,
                     $fieldType === FieldTypeEnum::MASS_CENTER ? BlockedFieldTypeEnum::HARD_BLOCK : BlockedFieldTypeEnum::SOFT_BLOCK
@@ -243,15 +244,18 @@ final class SystemMapData implements SystemMapDataInterface
         }
     }
 
-    /** @return array<int, array{0: int, 1:int}> */
-    private function getSurroundingFields(int $x, int $y, int $range): array
+    /** @return array<int, PointInterface> */
+    private function getSurroundingPoints(PointInterface $point, int $range): array
     {
         $result = [];
+
+        $x = $point->getX();
+        $y = $point->getY();
 
         for ($i = $x - $range; $i <= $x + $range; $i++) {
             for ($j = $y - $range; $j <= $y + $range; $j++) {
                 $index = $i + ($j - 1) * $this->width;
-                $result[$index] = [$i, $j];
+                $result[$index] = new Point($i, $j);
             }
         }
 

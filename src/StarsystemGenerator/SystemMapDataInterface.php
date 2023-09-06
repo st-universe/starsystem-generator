@@ -2,6 +2,8 @@
 
 namespace Stu\StarsystemGenerator;
 
+use Stu\StarsystemGenerator\Lib\FieldInterface;
+use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 
 interface SystemMapDataInterface
@@ -10,30 +12,26 @@ interface SystemMapDataInterface
 
     public function getHeight(): int;
 
-    public function setFieldId(
-        int $x,
-        int $y,
-        int $fieldId,
-        int $fieldType,
+    public function setField(
+        FieldInterface $field,
         bool $allowSoftBlock = false
     ): SystemMapDataInterface;
 
     public function blockField(
-        int $x,
-        int $y,
+        PointInterface $point,
         bool $blockSurrounding,
         ?int $fieldType,
         int $blockType
     ): void;
 
-    /** @return array<int, array{0: int, 1: int}> */
+    /** @return array<int, PointInterface> */
     public function getAsteroidRing(int $radiusPercentage): array;
 
     public function getRandomPlanetAmount(StuRandom $stuRandom): int;
 
     public function getRandomMoonAmount(StuRandom $stuRandom): int;
 
-    /** @return null|array<int, array{0: int, 1: int}> */
+    /** @return null|array<PointInterface> */
     public function getPlanetDisplay(int $radiusPercentage, int $moonRange): ?array;
 
     /** @return array<int, int> */

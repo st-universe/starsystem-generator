@@ -9,6 +9,9 @@ use Stu\StarsystemGenerator\Config\PlanetRadius;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Lib\Field;
+use Stu\StarsystemGenerator\Lib\Point;
+use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
 
@@ -28,9 +31,6 @@ final class PlanetPlacement implements PlanetPlacementInterface
         $this->stuRandom = $stuRandom;
     }
 
-    /**
-     * @return array<int, array{0:int, 1:int}>
-     */
     public function placePlanet(int &$planetAmount, SystemMapDataInterface $mapData, SystemConfigurationInterface $config): array
     {
         $planetDisplay = null;
@@ -63,28 +63,28 @@ final class PlanetPlacement implements PlanetPlacementInterface
 
         $planetAmount--;
 
-        [$centerX, $centerY] = $this->getCenterCoordinate($planetDisplay);
+        $centerPoint = $this->getCenterCoordinate($planetDisplay);
 
         try {
-            $mapData->setFieldId($centerX, $centerY, $randomPlanetFieldId, FieldTypeEnum::PLANET);
+            $mapData->setField(new Field($centerPoint, $randomPlanetFieldId));
         } catch (RuntimeException $e) {
             $this->dumpBothDisplays($mapData);
 
             throw $e;
         }
-        $mapData->blockField($centerX, $centerY, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
+        $mapData->blockField($centerPoint, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
 
         //hard block fields left and right if ring planet
         if ((int)($randomPlanetFieldId / 100) === 3) {
-            $mapData->blockField($centerX - 1, $centerY, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
-            $mapData->blockField($centerX + 1, $centerY, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
+            $mapData->blockField($centerPoint->getLeft(), false, null, BlockedFieldTypeEnum::HARD_BLOCK);
+            $mapData->blockField($centerPoint->getRight(), false, null, BlockedFieldTypeEnum::HARD_BLOCK);
         }
 
         return $planetDisplay;
     }
 
     /**
-     * @return null|array<int, array{0:int, 1:int}>
+     * @return null|array<int, PointInterface>
      */
     private function tryToFindPlanetDisplay(
         SystemMapDataInterface $mapData,
@@ -115,22 +115,20 @@ final class PlanetPlacement implements PlanetPlacementInterface
     }
 
     /** 
-     * @param array<int, array{0: int, 1: int}> $fields
-     * @return array{0: int, 1:int}
+     * @param array<int, PointInterface> $fields
      */
-    private function getCenterCoordinate(array $fields): array
+    private function getCenterCoordinate(array $fields): PointInterface
     {
-        $firstField = current($fields);
-        $lastField = end($fields);
+        $firstPoint = current($fields);
+        $lastPoint = end($fields);
 
-        if ($firstField === false || $lastField === false) {
+        if ($firstPoint === false || $lastPoint === false) {
             throw new RuntimeException('this should not happen');
         }
 
-        [$minX, $minY] = $firstField;
-        [$maxX, $maxY] = $lastField;
-
-        return [($minX + $maxX) / 2, ($minY + $maxY) / 2];
+        return new Point(($firstPoint->getX() + $lastPoint->getX()) / 2,
+            ($firstPoint->getY() + $lastPoint->getY()) / 2
+        );
     }
 
     private function dumpBothDisplays(SystemMapDataInterface $mapData): void

@@ -3,6 +3,7 @@
 namespace Stu\StarsystemGenerator\Component;
 
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
+use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
 
@@ -40,7 +41,7 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
     }
 
     /** 
-     * @param array<int, array<int, array{0:int, 1:int}>> $planetDisplays
+     * @param array<int, array<int, PointInterface>> $planetDisplays
      */
     private function placeMoon(int &$moonAmount, array $planetDisplays): void
     {

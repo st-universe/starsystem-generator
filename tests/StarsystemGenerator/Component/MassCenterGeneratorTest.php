@@ -7,6 +7,7 @@ use Mockery;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Lib\FieldInterface;
 use Stu\StarsystemGenerator\StuTestCase;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
 
@@ -189,15 +190,26 @@ final class MassCenterGeneratorTest extends StuTestCase
         foreach ($expectedMap as $row => $values) {
             foreach ($values as $column => $value) {
                 if ($value !== 0) {
-                    $mapData->shouldReceive('setFieldId')
-                        ->with($column + 1, $row + 1, $value, FieldTypeEnum::MASS_CENTER)
+                    $mapData->shouldReceive('setField')
+                        ->with(Mockery::on(function (FieldInterface $field) use ($value, $column, $row) {
+                            if ($field->getId() !== $value) {
+                                return false;
+                            }
+                            if ($field->getPoint()->getX() !== $column + 1) {
+                                return false;
+                            }
+                            if ($field->getPoint()->getY() !== $row + 1) {
+                                return false;
+                            }
+                            return true;
+                        }))
                         ->once();
                 }
             }
         }
 
         $mapData->shouldReceive('blockField')
-            ->with(Mockery::any(), Mockery::any(), true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
+            ->with(Mockery::any(), true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
 
         $this->subject->generate(
             $firstMassCenterFields,

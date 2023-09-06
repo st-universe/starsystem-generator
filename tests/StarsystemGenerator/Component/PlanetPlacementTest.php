@@ -8,6 +8,9 @@ use Stu\StarsystemGenerator\Config\PlanetMoonProbabilitiesInterface;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Lib\FieldInterface;
+use Stu\StarsystemGenerator\Lib\Point;
+use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\StuTestCase;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
@@ -59,15 +62,36 @@ final class PlanetPlacementTest extends StuTestCase
             ->once()
             ->andReturn(45);
 
+        $point = new Point(42, 43);
+
         $this->mapData->shouldReceive('getPlanetDisplay')
             ->with(Mockery::any(), Mockery::any())
             ->once()
-            ->andReturn([[42, 42]]);
-        $this->mapData->shouldReceive('setFieldId')
-            ->with(42, 42, 201, FieldTypeEnum::PLANET)
+            ->andReturn([$point]);
+        $this->mapData->shouldReceive('setField')
+            ->with(Mockery::on(function (FieldInterface $field) {
+                if ($field->getId() !== 201) {
+                    return false;
+                }
+                if ($field->getPoint()->getX() !== 42) {
+                    return false;
+                }
+                if ($field->getPoint()->getY() !== 43) {
+                    return false;
+                }
+                return true;
+            }))
             ->once();
         $this->mapData->shouldReceive('blockField')
-            ->with(42, 42, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK)
+            ->with(Mockery::on(function (PointInterface $point) {
+                if ($point->getX() !== 42) {
+                    return false;
+                }
+                if ($point->getY() !== 43) {
+                    return false;
+                }
+                return true;
+            }), true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK)
             ->once();
 
         $planetAmount = 1;

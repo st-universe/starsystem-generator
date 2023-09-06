@@ -6,6 +6,10 @@ use InvalidArgumentException;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Lib\Field;
+use Stu\StarsystemGenerator\Lib\FieldInterface;
+use Stu\StarsystemGenerator\Lib\Point;
+use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
 
 final class MassCenterGenerator implements MassCenterGeneratorInterface
@@ -54,67 +58,73 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
             ));
         }
 
-        $this->checkForBlockFields($placedFields, $mapData);
+        $this->blockMassCenterArea($placedFields, $mapData);
     }
 
     /**
-     * @param array<array{0: int, 1: int, 2: int}> $polygon
+     * @param array<FieldInterface> $fields
      */
-    private function checkForBlockFields(array $polygon, SystemMapDataInterface $mapData): void
+    private function blockMassCenterArea(array $fields, SystemMapDataInterface $mapData): void
     {
-        $convexHull = $this->calculateConvexHull($polygon);
+        $points = array_map(fn (FieldInterface $field) => $field->getPoint(), $fields);
+        $convexHull = $this->calculateConvexHull($points);
 
         for ($y = 1; $y <= $mapData->getHeight(); $y++) {
             for ($x = 1; $x <= $mapData->getWidth(); $x++) {
                 if ($this->isPointInsidePolygon($x, $y, $convexHull)) {
-                    $mapData->blockField($x, $y, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
+                    $mapData->blockField(
+                        new Point($x, $y),
+                        true,
+                        FieldTypeEnum::MASS_CENTER,
+                        BlockedFieldTypeEnum::HARD_BLOCK
+                    );
                 }
             }
         }
     }
 
     /**
-     * @param array<array{0: int, 1: int, 2: int}> $coordinates
+     * @param array<PointInterface> $points
      * 
-     * @return array<array{0: int, 1:int}>
+     * @return array<PointInterface>
      */
-    private function calculateConvexHull(array $coordinates): array
+    private function calculateConvexHull(array $points): array
     {
         // Sort coordinates by their x and y values
-        usort($coordinates, function ($a, $b) {
-            if ($a[0] == $b[0]) {
-                return $a[1] - $b[1];
+        usort($points, function (PointInterface $a, PointInterface $b) {
+            if ($a->getX() == $b->getX()) {
+                return $a->getY() - $b->getY();
             }
-            return $a[0] - $b[0];
+            return $a->getX() - $b->getX();
         });
 
         // Initialize upper and lower hulls
-        /** @var array<array{0: int, 1: int}> */
+        /** @var array<PointInterface> */
         $upperHull = [];
 
-        /** @var array<array{0: int, 1: int}> */
+        /** @var array<PointInterface> */
         $lowerHull = [];
 
         // Compute the upper hull
-        foreach ($coordinates as $coord) {
+        foreach ($points as $coord) {
             while (
                 count($upperHull) >= 2 &&
                 $this->crossProduct($upperHull[count($upperHull) - 2], $upperHull[count($upperHull) - 1], $coord) <= 0
             ) {
                 array_pop($upperHull);
             }
-            $upperHull[] = [$coord[0], $coord[1]];
+            $upperHull[] = $coord;
         }
 
         // Compute the lower hull
-        foreach (array_reverse($coordinates) as $coord) {
+        foreach (array_reverse($points) as $coord) {
             while (
                 count($lowerHull) >= 2 &&
                 $this->crossProduct($lowerHull[count($lowerHull) - 2], $lowerHull[count($lowerHull) - 1], $coord) <= 0
             ) {
                 array_pop($lowerHull);
             }
-            $lowerHull[] = [$coord[0], $coord[1]];
+            $lowerHull[] = $coord;
         }
 
         // Remove duplicate points between upper and lower hulls
@@ -127,19 +137,15 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
         return $convexHull;
     }
 
-    /**
-     * @param array{0: int, 1: int} $a
-     * @param array{0: int, 1: int} $b
-     * @param array{0: int, 1: int, 2: int} $c
-     */
-    private function crossProduct($a, $b, $c): int
+    private function crossProduct(PointInterface $a, PointInterface $b, PointInterface $c): int
     {
-        return ($b[0] - $a[0]) * ($c[1] - $a[1]) - ($b[1] - $a[1]) * ($c[0] - $a[0]);
+        return ($b->getX() - $a->getX()) * ($c->getY() - $a->getY())
+            - ($b->getY() - $a->getY()) * ($c->getX() - $a->getX());
     }
 
 
     /**
-     * @param array<array{0: int, 1: int}> $polygon
+     * @param array<PointInterface> $polygon
      */
     private function isPointInsidePolygon(int $x, int $y, array $polygon): bool
     {
@@ -147,10 +153,10 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
         $count = count($polygon);
 
         for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
-            $xi = $polygon[$i][0];
-            $yi = $polygon[$i][1];
-            $xj = $polygon[$j][0];
-            $yj = $polygon[$j][1];
+            $xi = $polygon[$i]->getX();
+            $yi = $polygon[$i]->getY();
+            $xj = $polygon[$j]->getX();
+            $yj = $polygon[$j]->getY();
 
             $intersect = (($yi > $y) != ($yj > $y))
                 && ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi);
@@ -166,7 +172,7 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
     /** 
      * @param array<int, int> $fields 
      * 
-     * @return array<array{0: int, 1: int, 2: int}>
+     * @return array<FieldInterface>
      * */
     private function placeMassCenter(
         array $fields,
@@ -184,7 +190,7 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
 
         $mapFields = [];
 
-        foreach ($fields as $key => $id) {
+        foreach ($fields as $key => $type) {
             $column = $key % $massCenterSize + 1;
             $row = ((int) $key / $massCenterSize) + 1;
 
@@ -196,11 +202,11 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
                 $y = $yOffset + $overallHeight - ($massCenterSize - $row);
             }
 
-            $mapFields[] = [$x, $y, $id];
+            $mapFields[] = new Field(new Point($x, $y), $type);
         }
 
-        foreach ($mapFields as [$x, $y, $id]) {
-            $mapData->setFieldId($x, $y, $id, FieldTypeEnum::MASS_CENTER);
+        foreach ($mapFields as $field) {
+            $mapData->setField($field);
         }
 
         return $mapFields;

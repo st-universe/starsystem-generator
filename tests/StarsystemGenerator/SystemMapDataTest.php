@@ -5,6 +5,8 @@ namespace Stu\StarsystemGenerator;
 use RuntimeException;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Lib\Field;
+use Stu\StarsystemGenerator\Lib\Point;
 
 final class SystemMapDataTest extends StuTestCase
 {
@@ -12,7 +14,7 @@ final class SystemMapDataTest extends StuTestCase
     {
         $mapData = new SystemMapData(5, 5);
 
-        $mapData->setFieldId(3, 3, 5, FieldTypeEnum::PLANET);
+        $mapData->setField(new Field(new Point(3, 3), 5));
 
         static::assertEquals(
             "0,0,0,0,0\n"
@@ -44,9 +46,9 @@ final class SystemMapDataTest extends StuTestCase
 
         $mapData = new SystemMapData(5, 5);
 
-        $mapData->blockField($posX, $posY, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
+        $mapData->blockField(new Point($posX, $posY), true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
 
-        $mapData->setFieldId($x, $y, 42, 42);
+        $mapData->setField(new Field(new Point($x, $y), 42));
     }
 
     public static function provideBlockedFieldsForMassCenterData()
@@ -73,9 +75,9 @@ final class SystemMapDataTest extends StuTestCase
 
         $mapData = new SystemMapData(5, 5);
 
-        $mapData->blockField($posX, $posY, true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
+        $mapData->blockField(new Point($posX, $posY), true, FieldTypeEnum::MASS_CENTER, BlockedFieldTypeEnum::HARD_BLOCK);
 
-        $mapData->setFieldId($x, $y, 42, 42);
+        $mapData->setField(new Field(new Point($x, $y), 42));
     }
 
     public function testGetAsteroidRing(): void
@@ -84,7 +86,10 @@ final class SystemMapDataTest extends StuTestCase
 
         $result = $mapData->getAsteroidRing(50);
 
-        $this->assertEquals([[2, 1], [3, 1], [1, 2], [4, 2], [1, 3], [4, 3], [2, 4], [3, 4]], $result);
+        $this->assertEquals([
+            new Point(2, 1), new Point(3, 1),
+            new Point(1, 2), new Point(4, 2), new Point(1, 3), new Point(4, 3), new Point(2, 4), new Point(3, 4)
+        ], $result);
     }
 
 
@@ -102,7 +107,7 @@ final class SystemMapDataTest extends StuTestCase
     {
         $mapData = new SystemMapData(3, 2);
 
-        $mapData->setFieldId(2, 1, 5, FieldTypeEnum::ASTEROID);
+        $mapData->setField(new Field(new Point(2, 1), 5));
 
         static::assertEquals(
             "0,5,0\n"
