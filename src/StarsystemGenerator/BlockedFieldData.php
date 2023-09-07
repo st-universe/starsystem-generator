@@ -31,6 +31,10 @@ final class BlockedFieldData implements BlockedFieldDataInterface
     {
         $index = $this->getFieldIndex($point);
 
+        if (!array_key_exists($index, $this->blockedFields)) {
+            return;
+        }
+
         if ($this->blockedFields[$index] < $blockType) {
             $this->blockedFields[$index] = $blockType;
         }
