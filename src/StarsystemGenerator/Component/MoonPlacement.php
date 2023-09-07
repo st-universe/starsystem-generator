@@ -14,6 +14,7 @@ use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\MassCenterPerimeterBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\UnknownFieldIndexException;
 use Stu\StarsystemGenerator\Lib\Field;
+use Stu\StarsystemGenerator\Lib\PlanetDisplayInterface;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
@@ -37,7 +38,8 @@ final class MoonPlacement implements MoonPlacementInterface
 
     public function placeMoon(
         int &$moonAmount,
-        ?array $planetDisplay,
+        int &$planetAmount,
+        ?PlanetDisplayInterface $planetDisplay,
         SystemMapDataInterface $mapData,
         SystemConfigurationInterface $config
     ): void {
@@ -56,11 +58,15 @@ final class MoonPlacement implements MoonPlacementInterface
             try {
                 $randomLocation = $planetDisplay === null
                     ? $this->getRandomLocationForMoon($mapData, $randomMoonFieldId)
-                    : $planetDisplay[$this->stuRandom->rand(0, count($planetDisplay) - 1)];
+                    : $planetDisplay->getRandomPoint($this->stuRandom);
 
                 if ($randomLocation !== null) {
                     $mapData->setField(new Field($randomLocation, $randomMoonFieldId), BlockedFieldTypeEnum::SOFT_BLOCK);
                     $mapData->blockField($randomLocation, false, FieldTypeEnum::MOON, BlockedFieldTypeEnum::HARD_BLOCK);
+                    $mapData->addIdentifier(
+                        $randomLocation,
+                        $this->getMoonIdentifier($planetDisplay, $planetAmount)
+                    );
 
                     break;
                 }
@@ -79,7 +85,18 @@ final class MoonPlacement implements MoonPlacementInterface
             throw new DisplayNotSuitableForMoonException('could not place the moon');
         }
 
-        $moonAmount--;
+        $moonAmount++;
+    }
+
+    private function getMoonIdentifier(?PlanetDisplayInterface $planetDisplay, int &$planetAmount): string
+    {
+        if ($planetDisplay === null) {
+            $planetAmount++;
+
+            return (string)$planetAmount;
+        } else {
+            return $planetDisplay->getMoonIdentifier();
+        }
     }
 
     private function getRandomLocationForMoon(
@@ -87,23 +104,21 @@ final class MoonPlacement implements MoonPlacementInterface
         int $moonFieldId
     ): ?PointInterface {
 
-        $location = null;
+        $planetDisplay = null;
 
         $maxTries = self::MAX_RETRIES_FOR_RANDOM_LOCATION;
-        while ($maxTries > 0 && $location === null) {
+        while ($maxTries > 0 && $planetDisplay === null) {
             $moonRadiusPercentage = PlanetRadius::getRandomPlanetRadiusPercentage($moonFieldId, $this->stuRandom, true);
 
-            $location = $mapData->getPlanetDisplay($moonRadiusPercentage, 0);
+            $planetDisplay = $mapData->getPlanetDisplay($moonRadiusPercentage, 0);
 
             $maxTries--;
         }
 
-        if ($location === null) {
+        if ($planetDisplay === null) {
             return null;
         }
 
-        $current = current($location);
-
-        return $current === false ? null : $current;
+        return $planetDisplay->getFirstPoint();
     }
 }

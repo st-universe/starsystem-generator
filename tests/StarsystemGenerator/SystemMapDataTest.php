@@ -113,7 +113,7 @@ final class SystemMapDataTest extends StuTestCase
         $result = $mapData->getPlanetDisplay(50, 1);
 
         //echo print_r($result, true);
-        $this->assertEquals(9, count($result));
+        $this->assertEquals(9, count($result->getPoints()));
     }
 
     public function testToString(): void

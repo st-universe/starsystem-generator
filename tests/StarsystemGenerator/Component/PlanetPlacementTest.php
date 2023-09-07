@@ -9,6 +9,7 @@ use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Lib\FieldInterface;
+use Stu\StarsystemGenerator\Lib\PlanetDisplayInterface;
 use Stu\StarsystemGenerator\Lib\Point;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
@@ -43,6 +44,8 @@ final class PlanetPlacementTest extends StuTestCase
 
     public function testPlacePlanet(): void
     {
+        $planetAmount = 1;
+
         $this->config->shouldReceive('getProbabilities')
             ->with(FieldTypeEnum::PLANET)
             ->once()
@@ -63,11 +66,21 @@ final class PlanetPlacementTest extends StuTestCase
             ->andReturn(45);
 
         $point = new Point(42, 43);
+        $planetDisplay = $this->mock(PlanetDisplayInterface::class);
+
+        $planetDisplay->shouldReceive('getFirstPoint')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($point);
+        $planetDisplay->shouldReceive('getLastPoint')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($point);
 
         $this->mapData->shouldReceive('getPlanetDisplay')
-            ->with(Mockery::any(), Mockery::any())
+            ->with(Mockery::any(), Mockery::any(), "2")
             ->once()
-            ->andReturn([$point]);
+            ->andReturn($planetDisplay);
         $this->mapData->shouldReceive('setField')
             ->with(Mockery::on(function (FieldInterface $field) {
                 if ($field->getId() !== 201) {
@@ -82,6 +95,18 @@ final class PlanetPlacementTest extends StuTestCase
                 return true;
             }))
             ->once();
+        $this->mapData->shouldReceive('addIdentifier')
+            ->with(Mockery::on(function (PointInterface $point) {
+                if ($point->getX() !== 42) {
+                    return false;
+                }
+                if ($point->getY() !== 43) {
+                    return false;
+                }
+                return true;
+            }), 2)
+            ->once();
+
         $this->mapData->shouldReceive('blockField')
             ->with(Mockery::on(function (PointInterface $point) {
                 if ($point->getX() !== 42) {
@@ -94,7 +119,6 @@ final class PlanetPlacementTest extends StuTestCase
             }), true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::HARD_BLOCK)
             ->once();
 
-        $planetAmount = 1;
 
         $this->subject->placePlanet(
             $planetAmount,
@@ -102,6 +126,6 @@ final class PlanetPlacementTest extends StuTestCase
             $this->config
         );
 
-        $this->assertEquals(0, $planetAmount);
+        $this->assertEquals(2, $planetAmount);
     }
 }

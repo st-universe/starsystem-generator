@@ -4,9 +4,10 @@ namespace Stu\StarsystemGenerator\Component;
 
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Exception\DisplayNotSuitableForMoonException;
+use Stu\StarsystemGenerator\Exception\MoonMaximumReachedException;
 use Stu\StarsystemGenerator\Exception\NoSuitablePlanetTypeFoundException;
 use Stu\StarsystemGenerator\Exception\PlanetMaximumReachedException;
-use Stu\StarsystemGenerator\Lib\PointInterface;
+use Stu\StarsystemGenerator\Lib\PlanetDisplayInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
 
@@ -35,30 +36,44 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
         SystemConfigurationInterface $config,
     ): void {
 
-        $planetAmount = $this->getPlanetAmount($mapData, $config);
+        $maxPlanets = $this->getPlanetAmount($mapData, $config);
+        $maxMoons = $this->getMoonAmount($mapData, $config);
 
-        $moonAmount = $this->getMoonAmount($mapData, $config);
+        $planetAmount = 0;
+        $moonAmount = 0;
 
         $planetDisplays = [];
 
         try {
-            while ($planetAmount > 0) {
+            while ($planetAmount < $maxPlanets) {
                 $planetDisplays[] = $this->planetPlacement->placePlanet($planetAmount, $mapData, $config);
             }
         } catch (NoSuitablePlanetTypeFoundException | PlanetMaximumReachedException $e) {
             //echo 'stoppedPlanetPLacement';
         }
-        while ($moonAmount > 0) {
+        while ($moonAmount < $maxMoons) {
             //echo $moonAmount;
-            $this->placeMoon($moonAmount, $planetDisplays, $mapData, $config);
+
+            try {
+                $this->placeMoon(
+                    $moonAmount,
+                    $planetAmount,
+                    $planetDisplays,
+                    $mapData,
+                    $config
+                );
+            } catch (MoonMaximumReachedException $e) {
+                break;
+            }
         }
     }
 
     /** 
-     * @param array<int, array<int, PointInterface>> $planetDisplays
+     * @param array<int, PlanetDisplayInterface> $planetDisplays
      */
     private function placeMoon(
         int &$moonAmount,
+        int &$planetAmount,
         array $planetDisplays,
         SystemMapDataInterface $mapData,
         SystemConfigurationInterface $config,
@@ -66,11 +81,17 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
 
         $maxTries = self::MAXIMUM_MOON_PLACEMENT_TRIES;
 
-        while ($maxTries > 0 && $moonAmount > 0) {
+        while ($maxTries > 0) {
             try {
                 $randomDisplayIndex = $this->stuRandom->rand(0, count($planetDisplays));
                 $isTrabant =  array_key_exists($randomDisplayIndex, $planetDisplays);
-                $this->moonPlacement->placeMoon($moonAmount, $isTrabant ? $planetDisplays[$randomDisplayIndex] : null, $mapData, $config);
+                $this->moonPlacement->placeMoon(
+                    $moonAmount,
+                    $planetAmount,
+                    $isTrabant ? $planetDisplays[$randomDisplayIndex] : null,
+                    $mapData,
+                    $config
+                );
                 break;
             } catch (DisplayNotSuitableForMoonException $e) {
                 // nothing to do here
@@ -81,7 +102,7 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
 
         // if placement impossible, stop moon placement
         if ($maxTries === 0) {
-            $moonAmount = 0;
+            throw new MoonMaximumReachedException('no more moons placeable');
         }
     }
 

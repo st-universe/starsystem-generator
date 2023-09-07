@@ -11,6 +11,7 @@ use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Exception\PlanetMaximumReachedException;
 use Stu\StarsystemGenerator\Lib\Field;
+use Stu\StarsystemGenerator\Lib\PlanetDisplayInterface;
 use Stu\StarsystemGenerator\Lib\Point;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
@@ -32,7 +33,7 @@ final class PlanetPlacement implements PlanetPlacementInterface
         $this->stuRandom = $stuRandom;
     }
 
-    public function placePlanet(int &$planetAmount, SystemMapDataInterface $mapData, SystemConfigurationInterface $config): array
+    public function placePlanet(int &$planetAmount, SystemMapDataInterface $mapData, SystemConfigurationInterface $config): PlanetDisplayInterface
     {
         $planetDisplay = null;
 
@@ -48,7 +49,11 @@ final class PlanetPlacement implements PlanetPlacementInterface
             );
             $triedPlanetFieldIds[] = $randomPlanetFieldId;
 
-            $planetDisplay = $this->tryToFindPlanetDisplay($mapData, $randomPlanetFieldId);
+            $planetDisplay = $this->tryToFindPlanetDisplay(
+                $mapData,
+                $randomPlanetFieldId,
+                $planetAmount + 1
+            );
 
             if ($planetDisplay !== null) {
                 break;
@@ -62,13 +67,15 @@ final class PlanetPlacement implements PlanetPlacementInterface
             throw new PlanetMaximumReachedException(sprintf('could not place any of %d colony classes', self::MAX_TRIED_PLANET_TYPES));
         }
 
-        $planetAmount--;
+        $planetAmount++;
 
         $centerPoint = $this->getCenterCoordinate($planetDisplay);
 
         try {
             $mapData->setField(new Field($centerPoint, $randomPlanetFieldId));
+            $mapData->addIdentifier($centerPoint, (string)$planetAmount);
         } catch (RuntimeException $e) {
+            //echo $e->getMessage();
             $this->dumpBothDisplays($mapData);
 
             throw $e;
@@ -100,12 +107,13 @@ final class PlanetPlacement implements PlanetPlacementInterface
     }
 
     /**
-     * @return null|array<int, PointInterface>
+     * @return null|PlanetDisplayInterface
      */
     private function tryToFindPlanetDisplay(
         SystemMapDataInterface $mapData,
-        int $randomPlanetFieldId
-    ): ?array {
+        int $randomPlanetFieldId,
+        int $planetAmount
+    ): ?PlanetDisplayInterface {
 
         $planetMoonRange = PlanetMoonRange::getPlanetMoonRange($randomPlanetFieldId);
 
@@ -117,7 +125,8 @@ final class PlanetPlacement implements PlanetPlacementInterface
 
             $planetDisplay = $mapData->getPlanetDisplay(
                 $planetRadiusPercentage,
-                $planetMoonRange
+                $planetMoonRange,
+                (string)$planetAmount
             );
 
             if ($planetDisplay !== null) {
@@ -130,17 +139,10 @@ final class PlanetPlacement implements PlanetPlacementInterface
         return $planetDisplay;
     }
 
-    /** 
-     * @param array<int, PointInterface> $fields
-     */
-    private function getCenterCoordinate(array $fields): PointInterface
+    private function getCenterCoordinate(PlanetDisplayInterface $planetDisplay): PointInterface
     {
-        $firstPoint = current($fields);
-        $lastPoint = end($fields);
-
-        if ($firstPoint === false || $lastPoint === false) {
-            throw new RuntimeException('this should not happen');
-        }
+        $firstPoint = $planetDisplay->getFirstPoint();
+        $lastPoint = $planetDisplay->getLastPoint();
 
         return new Point(($firstPoint->getX() + $lastPoint->getX()) / 2,
             ($firstPoint->getY() + $lastPoint->getY()) / 2

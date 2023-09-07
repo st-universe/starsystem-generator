@@ -11,6 +11,8 @@ use Stu\StarsystemGenerator\Exception\MassCenterPerimeterBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\UnknownFieldIndexException;
 use Stu\StarsystemGenerator\Lib\FieldInterface;
 use Stu\StarsystemGenerator\Lib\GeometryCalculations;
+use Stu\StarsystemGenerator\Lib\PlanetDisplay;
+use Stu\StarsystemGenerator\Lib\PlanetDisplayInterface;
 use Stu\StarsystemGenerator\Lib\Point;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
@@ -23,6 +25,9 @@ final class SystemMapData implements SystemMapDataInterface
 
     /** @var array<int, int> */
     private array $fieldData;
+
+    /** @var array<int, string> */
+    private array $identifiers = [];
 
     private BlockedFieldDataInterface $blockedFieldData;
 
@@ -130,7 +135,7 @@ final class SystemMapData implements SystemMapDataInterface
     }
 
 
-    public function getPlanetDisplay(int $radiusPercentage, int $moonRange): ?array
+    public function getPlanetDisplay(int $radiusPercentage, int $moonRange, string $identifier = null): ?PlanetDisplayInterface
     {
         $ring = $this->getRing($radiusPercentage);
 
@@ -145,7 +150,7 @@ final class SystemMapData implements SystemMapDataInterface
                 //echo "IB";
             } else if ($this->areAllPointsUnused($displayPoints)) {
                 //echo "SUCCESS";
-                return $displayPoints;
+                return new PlanetDisplay($displayPoints, $identifier);
             } else {
                 //echo "USED";
             }
@@ -256,9 +261,34 @@ final class SystemMapData implements SystemMapDataInterface
         return $result;
     }
 
+    public function printIdentifiers(): void
+    {
+        echo "<table>";
+        foreach ($this->identifiers as $index => $identifier) {
+            echo "<tr>";
+
+            echo sprintf('<td>%d</td><td>%s</td>', $index, $identifier);
+
+            echo "</tr>";
+        }
+
+        echo "</table>";
+    }
+
     public function blockField(PointInterface $point, bool $blockSurrounding, ?int $fieldType, int $blockType): void
     {
         $this->blockedFieldData->blockField($point, $blockSurrounding, $fieldType, $blockType);
+    }
+
+    public function addIdentifier(PointInterface $point, string $identifier): void
+    {
+        $index = $this->getFieldIndex($point);
+        $this->identifiers[$index] = $identifier;
+    }
+
+    public function getIdentifier(int $index): string
+    {
+        return $this->identifiers[$index];
     }
 
     /** @return array<int, PointInterface> */

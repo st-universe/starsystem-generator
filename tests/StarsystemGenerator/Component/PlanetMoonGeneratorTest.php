@@ -5,6 +5,7 @@ namespace Stu\StarsystemGenerator\Component;
 use Mockery;
 use Mockery\MockInterface;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
+use Stu\StarsystemGenerator\Lib\PlanetDisplayInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\StuTestCase;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
@@ -63,11 +64,13 @@ final class PlanetMoonGeneratorTest extends StuTestCase
             ->once()
             ->andReturn(2);
 
+        $planetDisplay = $this->mock(PlanetDisplayInterface::class);
+
         $this->planetPlacement->shouldReceive('placePlanet')
             ->with(
                 Mockery::on(
                     function (&$planetAmount) {
-                        $planetAmount--;
+                        $planetAmount++;
                         return true;
                     }
                 ),
@@ -75,7 +78,7 @@ final class PlanetMoonGeneratorTest extends StuTestCase
                 $this->config
             )
             ->twice()
-            ->andReturn([1 => [2, 3]]);
+            ->andReturn($planetDisplay);
 
         $this->subject->generate(
             $this->mapData,
