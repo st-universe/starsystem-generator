@@ -6,6 +6,7 @@ use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\AsteroidTypeEnum;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Exception\AsteroidMaximumReachedException;
 use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\MassCenterPerimeterBlockedFieldException;
@@ -41,10 +42,21 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
 
         $ringRadiusPercentages = $this->getRingRadiusPercentages($mapData, $config, $firstMassCenterWidth, $secondMassCenterWidth);
 
+        $maxAsteroidsToSpawn = $config->getMaxAsteroids();
+
         foreach ($ringRadiusPercentages as $radiusPercentage) {
             $varianceMaximum = count($ringRadiusPercentages) === 1 ? 20 : 10;
 
-            $this->createRing($radiusPercentage, $varianceMaximum, $mapData);
+            try {
+                $this->createRing(
+                    $radiusPercentage,
+                    $varianceMaximum,
+                    $maxAsteroidsToSpawn,
+                    $mapData
+                );
+            } catch (AsteroidMaximumReachedException $e) {
+                break;
+            }
         }
     }
 
@@ -76,8 +88,12 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
         return $ringRadiusPercentages;
     }
 
-    private function createRing(int $radiusPercentage, int $varianceMaximum, SystemMapDataInterface $mapData): void
-    {
+    private function createRing(
+        int $radiusPercentage,
+        int $varianceMaximum,
+        int &$maxAsteroidsToSpawn,
+        SystemMapDataInterface $mapData
+    ): void {
         $possibleLocations = $mapData->getAsteroidRing(
             $radiusPercentage,
             $this->stuRandom->rand(0, $varianceMaximum)
@@ -90,6 +106,9 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
         $asteroidRingPoints = [];
 
         foreach ($possibleLocations as $point) {
+            if ($maxAsteroidsToSpawn === 0) {
+                break;
+            }
             $fieldId = AsteroidTypeEnum::getFieldId(
                 $asteroidType,
                 AsteroidTypeEnum::ASTEROID_CATEGORIES[$this->stuRandom->rand(0, count(AsteroidTypeEnum::ASTEROID_CATEGORIES) - 1)]
@@ -98,6 +117,7 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
             try {
                 $mapData->setField(new Field($point, $fieldId));
                 $asteroidRingPoints[] = $point;
+                $maxAsteroidsToSpawn--;
             } catch (
                 FieldAlreadyUsedException | HardBlockedFieldException
                 | MassCenterPerimeterBlockedFieldException $e
@@ -113,6 +133,10 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
                 FieldTypeEnum::ASTEROID,
                 BlockedFieldTypeEnum::HARD_BLOCK
             );
+        }
+
+        if ($maxAsteroidsToSpawn === 0) {
+            throw new AsteroidMaximumReachedException('no more asteroids');
         }
     }
 
