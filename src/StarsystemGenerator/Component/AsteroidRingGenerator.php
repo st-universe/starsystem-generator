@@ -41,7 +41,9 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
         $ringRadiusPercentages = $this->getRingRadiusPercentages($mapData, $config, $firstMassCenterWidth, $secondMassCenterWidth);
 
         foreach ($ringRadiusPercentages as $radiusPercentage) {
-            $this->createRing($radiusPercentage, $mapData);
+            $varianceMaximum = count($ringRadiusPercentages) === 1 ? 20 : 10;
+
+            $this->createRing($radiusPercentage, $varianceMaximum, $mapData);
         }
     }
 
@@ -73,9 +75,12 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
         return $ringRadiusPercentages;
     }
 
-    private function createRing(int $radiusPercentage, SystemMapDataInterface $mapData): void
+    private function createRing(int $radiusPercentage, int $varianceMaximum, SystemMapDataInterface $mapData): void
     {
-        $possibleLocations = $mapData->getAsteroidRing($radiusPercentage);
+        $possibleLocations = $mapData->getAsteroidRing(
+            $radiusPercentage,
+            $this->stuRandom->rand(0, $varianceMaximum)
+        );
 
         $this->insertGaps($possibleLocations);
 

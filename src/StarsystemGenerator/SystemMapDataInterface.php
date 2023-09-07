@@ -25,7 +25,7 @@ interface SystemMapDataInterface
     ): void;
 
     /** @return array<int, PointInterface> */
-    public function getAsteroidRing(int $radiusPercentage): array;
+    public function getAsteroidRing(int $radiusPercentage, int $variance): array;
 
     public function getRandomPlanetAmount(StuRandom $stuRandom): int;
 

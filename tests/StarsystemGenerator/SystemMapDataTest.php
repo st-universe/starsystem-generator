@@ -85,7 +85,7 @@ final class SystemMapDataTest extends StuTestCase
     {
         $mapData = new SystemMapData(5, 5);
 
-        $result = $mapData->getAsteroidRing(50);
+        $result = $mapData->getAsteroidRing(50, 0);
 
         $this->assertEquals([
             0 => new Point(2, 1),

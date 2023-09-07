@@ -108,10 +108,9 @@ final class SystemMapData implements SystemMapDataInterface
         return $this;
     }
 
-    public function getAsteroidRing(int $radiusPercentage): array
+    public function getAsteroidRing(int $radiusPercentage, int $variance): array
     {
-        // TODO twin rings to be thicker?
-        return $this->getRing($radiusPercentage);
+        return $this->getRing($radiusPercentage, $variance);
     }
 
 
@@ -161,11 +160,15 @@ final class SystemMapData implements SystemMapDataInterface
     }
 
     /** @return array<PointInterface> */
-    private function getRing(int $radiusPercentage): array
+    private function getRing(int $radiusPercentage, int $variance = 0): array
     {
         $result = [];
 
         $radius = (int)($this->getWidth() / 2 * $radiusPercentage / 100);
+
+        if ($radius === 0) {
+            return $result;
+        }
 
         $centerX = $this->getWidth() / 2;
         $centerY = $this->getHeight() / 2;
@@ -177,9 +180,16 @@ final class SystemMapData implements SystemMapDataInterface
 
         foreach (range(1, $this->getHeight()) as $y) {
             foreach (range(1, $this->getWidth()) as $x) {
-                $distance = (int)(sqrt(pow($x - $centerX, 2) + pow($y - $centerY, 2)));
+                $distance = sqrt(pow($x - $centerX, 2) + pow($y - $centerY, 2));
 
-                if ($distance === $radius) {
+                if ($variance === 0) {
+                    $distance = (int)$distance;
+                }
+
+                $diffAbsolut = abs($distance - $radius);
+                $diffVariance = $diffAbsolut / $radius * 100;
+
+                if ($diffVariance <= $variance) {
                     $angle = GeometryCalculations::calculateAngleBetweenVectors($verticalVector, [$centerPoint, new Point($x, $y)]);
                     $result[$angle] = new Point($x, $y);
                 }
