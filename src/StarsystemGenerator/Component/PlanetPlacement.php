@@ -9,6 +9,7 @@ use Stu\StarsystemGenerator\Config\PlanetRadius;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Exception\PlanetMaximumReachedException;
 use Stu\StarsystemGenerator\Lib\Field;
 use Stu\StarsystemGenerator\Lib\Point;
 use Stu\StarsystemGenerator\Lib\PointInterface;
@@ -58,7 +59,7 @@ final class PlanetPlacement implements PlanetPlacementInterface
 
         if ($planetDisplay === null) {
             $this->dumpBothDisplays($mapData);
-            throw new RuntimeException(sprintf('could not place any of %d colony classes', self::MAX_TRIED_PLANET_TYPES));
+            throw new PlanetMaximumReachedException(sprintf('could not place any of %d colony classes', self::MAX_TRIED_PLANET_TYPES));
         }
 
         $planetAmount--;

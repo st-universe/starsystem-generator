@@ -5,6 +5,7 @@ namespace Stu\StarsystemGenerator\Component;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Exception\DisplayNotSuitableForMoonException;
 use Stu\StarsystemGenerator\Exception\NoSuitablePlanetTypeFoundException;
+use Stu\StarsystemGenerator\Exception\PlanetMaximumReachedException;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
@@ -44,7 +45,7 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
             while ($planetAmount > 0) {
                 $planetDisplays[] = $this->planetPlacement->placePlanet($planetAmount, $mapData, $config);
             }
-        } catch (NoSuitablePlanetTypeFoundException $e) {
+        } catch (NoSuitablePlanetTypeFoundException | PlanetMaximumReachedException $e) {
             //echo 'stoppedPlanetPLacement';
         }
         while ($moonAmount > 0) {
