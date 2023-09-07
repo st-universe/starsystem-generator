@@ -9,11 +9,11 @@ $config->setAllowedGrowthPercentage(20);
 
 $config->setMinSize(12);
 
-$config->setHasPlanets(true);
+$config->setHasPlanets(false);
 
-$config->setHasMoons(true);
+$config->setHasMoons(false);
 
-$config->setHasAsteroids(true);
+$config->setHasAsteroids(false);
 
 $config->setMaxPlanets(2);
 
