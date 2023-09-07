@@ -126,7 +126,7 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
             }
         }
 
-        foreach ($asteroidRingPoints as $point) {
+        foreach ($possibleLocations as $point) {
             $mapData->blockField(
                 $point,
                 true,
