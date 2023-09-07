@@ -72,15 +72,30 @@ final class PlanetPlacement implements PlanetPlacementInterface
 
             throw $e;
         }
-        $mapData->blockField($centerPoint, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
 
         //hard block fields left and right if ring planet
         if ((int)($randomPlanetFieldId / 100) === 3) {
-            $mapData->blockField($centerPoint->getLeft(), false, null, BlockedFieldTypeEnum::HARD_BLOCK);
-            $mapData->blockField($centerPoint->getRight(), false, null, BlockedFieldTypeEnum::HARD_BLOCK);
+            $this->addPlanetRing($randomPlanetFieldId, $centerPoint, $mapData);
         }
 
+        $mapData->blockField($centerPoint, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
+
         return $planetDisplay;
+    }
+
+    private function addPlanetRing(int $planetFieldId, PointInterface $planetLocation, SystemMapDataInterface $mapData): void
+    {
+        $leftRingFieldId = $planetFieldId * 10 + 1;
+        $rightRingFieldId = $planetFieldId * 10 + 2;
+
+        $leftRingPoint = $planetLocation->getLeft();
+        $rightRingPoint = $planetLocation->getRight();
+
+        $mapData->setField(new Field($leftRingPoint, $leftRingFieldId));
+        $mapData->setField(new Field($rightRingPoint, $rightRingFieldId));
+
+        $mapData->blockField($leftRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
+        $mapData->blockField($rightRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
     }
 
     /**
