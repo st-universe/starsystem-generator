@@ -2,7 +2,7 @@
 
 use Stu\StarsystemGenerator\Config\SystemConfiguration;
 
-$config = new SystemConfiguration();
+$config = new SystemConfiguration(1066);
 
 $config->setAllowedGrowthPercentage(20);
 

@@ -10,6 +10,8 @@ use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 //TODO unit tests
 final class SystemConfiguration implements SystemConfigurationInterface
 {
+    private int $systemType;
+
     // size
     private int $minSize = 7;
     private int $allowedGrowthPercentage = 0;
@@ -37,6 +39,16 @@ final class SystemConfiguration implements SystemConfigurationInterface
 
     private int $massCenterDistanceHorizontal = 2;
     private int $massCenterDistanceVertical = 2;
+
+    public function __construct(int $systemType)
+    {
+        $this->systemType = $systemType;
+    }
+
+    public function getSystemType(): int
+    {
+        return $this->systemType;
+    }
 
     public function getMinSize(): int
     {

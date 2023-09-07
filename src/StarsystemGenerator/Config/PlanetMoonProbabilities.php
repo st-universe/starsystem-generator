@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Stu\StarsystemGenerator\Config;
 
 use RuntimeException;
+use Stu\StarsystemGenerator\Exception\NoSuitablePlanetTypeFoundException;
 
 final class PlanetMoonProbabilities implements PlanetMoonProbabilitiesInterface
 {
@@ -69,6 +70,11 @@ final class PlanetMoonProbabilities implements PlanetMoonProbabilitiesInterface
         );
 
         $totalProbability = array_sum($probabilities);
+
+        if ($totalProbability === 0) {
+            throw new NoSuitablePlanetTypeFoundException();
+        }
+
         $randomNumber = random_int(1, $totalProbability);
         $cumulativeProbability = 0;
 

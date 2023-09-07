@@ -4,12 +4,15 @@ namespace Stu\StarsystemGenerator\Component;
 
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Exception\DisplayNotSuitableForMoonException;
+use Stu\StarsystemGenerator\Exception\NoSuitablePlanetTypeFoundException;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
 
 final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
 {
+    public const MAXIMUM_MOON_PLACEMENT_TRIES = 20;
+
     private PlanetPlacementInterface $planetPlacement;
 
     private MoonPlacementInterface $moonPlacement;
@@ -37,10 +40,15 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
 
         $planetDisplays = [];
 
-        while ($planetAmount > 0) {
-            $planetDisplays[] = $this->planetPlacement->placePlanet($planetAmount, $mapData, $config);
+        try {
+            while ($planetAmount > 0) {
+                $planetDisplays[] = $this->planetPlacement->placePlanet($planetAmount, $mapData, $config);
+            }
+        } catch (NoSuitablePlanetTypeFoundException $e) {
+            //echo 'stoppedPlanetPLacement';
         }
         while ($moonAmount > 0) {
+            //echo $moonAmount;
             $this->placeMoon($moonAmount, $planetDisplays, $mapData, $config);
         }
     }
@@ -54,14 +62,25 @@ final class PlanetMoonGenerator implements PlanetMoonGeneratorInterface
         SystemMapDataInterface $mapData,
         SystemConfigurationInterface $config,
     ): void {
-        try {
-            $randomDisplayIndex = $this->stuRandom->rand(0, count($planetDisplays));
-            $isTrabant =  array_key_exists($randomDisplayIndex, $planetDisplays);
-            $this->moonPlacement->placeMoon($moonAmount, $isTrabant ? $planetDisplays[$randomDisplayIndex] : null, $mapData, $config);
-        } catch (DisplayNotSuitableForMoonException $e) {
 
-            // retry
-            $this->placeMoon($moonAmount, $planetDisplays, $mapData, $config);
+        $maxTries = self::MAXIMUM_MOON_PLACEMENT_TRIES;
+
+        while ($maxTries > 0 && $moonAmount > 0) {
+            try {
+                $randomDisplayIndex = $this->stuRandom->rand(0, count($planetDisplays));
+                $isTrabant =  array_key_exists($randomDisplayIndex, $planetDisplays);
+                $this->moonPlacement->placeMoon($moonAmount, $isTrabant ? $planetDisplays[$randomDisplayIndex] : null, $mapData, $config);
+                break;
+            } catch (DisplayNotSuitableForMoonException $e) {
+                // nothing to do here
+            }
+
+            $maxTries--;
+        }
+
+        // if placement impossible, stop moon placement
+        if ($maxTries === 0) {
+            $moonAmount = 0;
         }
     }
 

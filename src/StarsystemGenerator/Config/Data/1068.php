@@ -3,7 +3,7 @@
 use Stu\StarsystemGenerator\Config\SystemConfiguration;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 
-$config = new SystemConfiguration();
+$config = new SystemConfiguration(1068);
 
 $config->setAllowedGrowthPercentage(20);
 

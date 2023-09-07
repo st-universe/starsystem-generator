@@ -4,6 +4,8 @@ namespace Stu\StarsystemGenerator\Config;
 
 interface SystemConfigurationInterface
 {
+    public function getSystemType(): int;
+
     public function getMinSize(): int;
 
     public function setMinSize(int $minSize): SystemConfigurationInterface;
