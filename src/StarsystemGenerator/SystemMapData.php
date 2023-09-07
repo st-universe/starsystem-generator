@@ -4,7 +4,6 @@ namespace Stu\StarsystemGenerator;
 
 use RuntimeException;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
-use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Exception\EdgeBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
@@ -25,16 +24,14 @@ final class SystemMapData implements SystemMapDataInterface
     /** @var array<int, int> */
     private array $fieldData;
 
-    /** @var array<int, int> */
-    private array $blockedFields = [];
+    private BlockedFieldDataInterface $blockedFieldData;
 
     public function __construct(int $width, int $height)
     {
         $this->width = $width;
         $this->height = $height;
         $this->fieldData = $this->initFieldArray(0);
-        $this->blockedFields = $this->initFieldArray(BlockedFieldTypeEnum::NOT_BLOCKED);
-        $this->blockOuterEdge();
+        $this->blockedFieldData = new BlockedFieldData($width, $height);
     }
 
     /**
@@ -52,26 +49,6 @@ final class SystemMapData implements SystemMapDataInterface
         }
 
         return $result;
-    }
-
-    private function blockOuterEdge(): void
-    {
-        // top edge
-        foreach (range(1, $this->getWidth()) as $x) {
-            $this->blockField(new Point($x, 1), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
-        }
-        // bottom edge
-        foreach (range(1, $this->getWidth()) as $x) {
-            $this->blockField(new Point($x, $this->getHeight()), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
-        }
-        // left edge
-        foreach (range(1, $this->getHeight()) as $y) {
-            $this->blockField(new Point(1, $y), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
-        }
-        // right edge
-        foreach (range(1, $this->getHeight()) as $y) {
-            $this->blockField(new Point($this->getWidth(), $y), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
-        }
     }
 
     public function getWidth(): int
@@ -116,7 +93,7 @@ final class SystemMapData implements SystemMapDataInterface
             throw new FieldAlreadyUsedException('already in use');
         }
 
-        $blockType = $this->blockedFields[$index];
+        $blockType = $this->blockedFieldData->getBlockType($index);
 
         $throwException = $blockType > $maxAllowedBlock;
         if ($throwException) {
@@ -164,7 +141,7 @@ final class SystemMapData implements SystemMapDataInterface
 
             $index = $this->getFieldIndex($point);
 
-            if ($this->blockedFields[$index] !== BlockedFieldTypeEnum::NOT_BLOCKED) {
+            if ($this->blockedFieldData->getBlockType($index) !== BlockedFieldTypeEnum::NOT_BLOCKED) {
                 //echo "IB";
             } else if ($this->areAllPointsUnused($displayPoints)) {
                 //echo "SUCCESS";
@@ -245,7 +222,7 @@ final class SystemMapData implements SystemMapDataInterface
 
     public function toString(bool $doPrint = false, bool $showBlocked = false): string
     {
-        $values = $showBlocked ? $this->blockedFields : $this->fieldData;
+        $values = $showBlocked ? $this->blockedFieldData->getData() : $this->fieldData;
 
         if ($doPrint) {
 
@@ -281,32 +258,7 @@ final class SystemMapData implements SystemMapDataInterface
 
     public function blockField(PointInterface $point, bool $blockSurrounding, ?int $fieldType, int $blockType): void
     {
-        $x = $point->getX();
-        $y = $point->getY();
-
-        if ($x < 1 || $x > $this->width || $y < 1 || $y > $this->height) {
-            return;
-        }
-
-        $index = $this->getFieldIndex($point);
-
-        if ($this->blockedFields[$index] < $blockType) {
-            $this->blockedFields[$index] = $blockType;
-        }
-
-        if ($blockSurrounding) {
-            $range = $fieldType === FieldTypeEnum::MASS_CENTER ? 2 : 1;
-
-            foreach ($this->getSurroundingPoints($point, $range) as $point) {
-                $this->blockField(
-                    $point,
-                    false,
-                    null,
-                    $fieldType === FieldTypeEnum::MASS_CENTER
-                        ? BlockedFieldTypeEnum::MASS_CENTER_PERIMETER_BLOCK : BlockedFieldTypeEnum::SOFT_BLOCK
-                );
-            }
-        }
+        $this->blockedFieldData->blockField($point, $blockSurrounding, $fieldType, $blockType);
     }
 
     /** @return array<int, PointInterface> */
