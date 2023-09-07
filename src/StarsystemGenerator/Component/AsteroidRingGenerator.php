@@ -8,6 +8,7 @@ use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
+use Stu\StarsystemGenerator\Exception\MassCenterPerimeterBlockedFieldException;
 use Stu\StarsystemGenerator\Lib\Field;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\Lib\StuRandom;
@@ -97,7 +98,10 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
             try {
                 $mapData->setField(new Field($point, $fieldId));
                 $asteroidRingPoints[] = $point;
-            } catch (FieldAlreadyUsedException | HardBlockedFieldException $e) {
+            } catch (
+                FieldAlreadyUsedException | HardBlockedFieldException
+                | MassCenterPerimeterBlockedFieldException $e
+            ) {
                 //nothing to do here
             }
         }

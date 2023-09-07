@@ -41,4 +41,43 @@ class GeometryCalculations
 
         return (int)round($angleInDegrees);
     }
+
+    /**
+     * @param array<PointInterface> $polygon
+     */
+    public static function isPointCoveredByPolygon(int $x, int $y, array $polygon): bool
+    {
+        $numVertices = count($polygon);
+
+        if ($numVertices < 3) {
+            return false; // A polygon with less than 3 vertices cannot cover any point.
+        }
+
+        // Check if the point is to the left of all edges of the convex hull.
+        for ($i = 0; $i < $numVertices; $i++) {
+            $currentVertex = $polygon[$i];
+            $nextVertex = $polygon[($i + 1) % $numVertices];
+
+            $edgeVector = [
+                $nextVertex->getX() - $currentVertex->getX(),
+                $nextVertex->getY() - $currentVertex->getY()
+            ];
+
+            $pointVector = [
+                $x - $currentVertex->getX(),
+                $y - $currentVertex->getY()
+            ];
+
+            // Calculate the cross product of the edge and point vectors.
+            $crossProduct = $edgeVector[0] * $pointVector[1] - $edgeVector[1] * $pointVector[0];
+
+            // If the cross product is positive, the point is to the left of the edge.
+            if ($crossProduct < 0) {
+                return false;
+            }
+        }
+
+        // If the point is to the left of all edges, it's inside or on the boundary of the convex hull.
+        return true;
+    }
 }

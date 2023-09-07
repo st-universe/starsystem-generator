@@ -11,4 +11,6 @@ interface PointInterface
     public function getLeft(): PointInterface;
 
     public function getRight(): PointInterface;
+
+    public function __toString(): string;
 }

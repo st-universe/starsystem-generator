@@ -37,4 +37,39 @@ final class GeometryCalculationsTest extends StuTestCase
 
         $this->assertEquals($expectedAngle, $result);
     }
+
+    public static function provideIsPointCoveredByPolygonData()
+    {
+        return [
+            [13, 13, true],
+            [14, 13, true],
+            [14, 14, true],
+            [13, 14, true],
+            [13, 12, false],
+            [14, 12, false],
+            [15, 12, false],
+            [15, 13, false],
+            [15, 14, false],
+            [15, 15, false],
+            [14, 15, false],
+            [13, 15, false],
+            [12, 15, false],
+            [12, 14, false],
+            [12, 13, false],
+            [12, 12, false],
+            [13, 12, false],
+        ];
+    }
+
+    /**
+     * @dataProvider provideIsPointCoveredByPolygonData
+     */
+    public function testIsPointCoveredByPolygon(int $x, int $y, bool $expectation): void
+    {
+        $polygon = [new Point(13, 13), new Point(14, 13), new Point(14, 14), new Point(13, 14)];
+
+        $result = GeometryCalculations::isPointCoveredByPolygon($x, $y, $polygon);
+
+        $this->assertEquals($expectation, $result);
+    }
 }

@@ -8,6 +8,7 @@ use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Lib\Field;
 use Stu\StarsystemGenerator\Lib\FieldInterface;
+use Stu\StarsystemGenerator\Lib\GeometryCalculations;
 use Stu\StarsystemGenerator\Lib\Point;
 use Stu\StarsystemGenerator\Lib\PointInterface;
 use Stu\StarsystemGenerator\SystemMapDataInterface;
@@ -69,9 +70,14 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
         $points = array_map(fn (FieldInterface $field) => $field->getPoint(), $fields);
         $convexHull = $this->calculateConvexHull($points);
 
+        //echo print_r($convexHull, true);
+
         for ($y = 1; $y <= $mapData->getHeight(); $y++) {
             for ($x = 1; $x <= $mapData->getWidth(); $x++) {
-                if ($this->isPointInsidePolygon($x, $y, $convexHull)) {
+                if (GeometryCalculations::isPointCoveredByPolygon($x, $y, $convexHull)) {
+
+                    //echo sprintf('B(%d,%d)', $x, $y);
+
                     $mapData->blockField(
                         new Point($x, $y),
                         true,
@@ -141,32 +147,6 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
     {
         return ($b->getX() - $a->getX()) * ($c->getY() - $a->getY())
             - ($b->getY() - $a->getY()) * ($c->getX() - $a->getX());
-    }
-
-
-    /**
-     * @param array<PointInterface> $polygon
-     */
-    private function isPointInsidePolygon(int $x, int $y, array $polygon): bool
-    {
-        $inside = false;
-        $count = count($polygon);
-
-        for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
-            $xi = $polygon[$i]->getX();
-            $yi = $polygon[$i]->getY();
-            $xj = $polygon[$j]->getX();
-            $yj = $polygon[$j]->getY();
-
-            $intersect = (($yi > $y) != ($yj > $y))
-                && ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi);
-
-            if ($intersect) {
-                $inside = !$inside;
-            }
-        }
-
-        return $inside;
     }
 
     /** 
