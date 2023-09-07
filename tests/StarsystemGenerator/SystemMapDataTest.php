@@ -6,6 +6,7 @@ use RuntimeException;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
+use Stu\StarsystemGenerator\Exception\MassCenterPerimeterBlockedFieldException;
 use Stu\StarsystemGenerator\Lib\Field;
 use Stu\StarsystemGenerator\Lib\Point;
 
@@ -71,8 +72,13 @@ final class SystemMapDataTest extends StuTestCase
         $posX = 3;
         $posY = 3;
 
-        static::expectExceptionMessage('field can not be used');
-        static::expectException(HardBlockedFieldException::class);
+        if ($posX === $x && $posY === $y) {
+            static::expectExceptionMessage('field can not be used, hard block');
+            static::expectException(HardBlockedFieldException::class);
+        } else {
+            static::expectExceptionMessage('field can not be used, mass center perimeter block');
+            static::expectException(MassCenterPerimeterBlockedFieldException::class);
+        }
 
         $mapData = new SystemMapData(5, 5);
 

@@ -11,6 +11,7 @@ use Stu\StarsystemGenerator\Exception\DisplayNotSuitableForMoonException;
 use Stu\StarsystemGenerator\Exception\EdgeBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
+use Stu\StarsystemGenerator\Exception\MassCenterPerimeterBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\UnknownFieldIndexException;
 use Stu\StarsystemGenerator\Lib\Field;
 use Stu\StarsystemGenerator\Lib\PointInterface;
@@ -58,14 +59,15 @@ final class MoonPlacement implements MoonPlacementInterface
                     : $planetDisplay[$this->stuRandom->rand(0, count($planetDisplay) - 1)];
 
                 if ($randomLocation !== null) {
-                    $mapData->setField(new Field($randomLocation, $randomMoonFieldId), true);
+                    $mapData->setField(new Field($randomLocation, $randomMoonFieldId), BlockedFieldTypeEnum::SOFT_BLOCK);
                     $mapData->blockField($randomLocation, false, FieldTypeEnum::MOON, BlockedFieldTypeEnum::HARD_BLOCK);
 
                     break;
                 }
             } catch (
                 UnknownFieldIndexException | EdgeBlockedFieldException
-                | HardBlockedFieldException | FieldAlreadyUsedException $e
+                | HardBlockedFieldException | FieldAlreadyUsedException
+                | MassCenterPerimeterBlockedFieldException $e
             ) {
                 //nothing to do here
             }

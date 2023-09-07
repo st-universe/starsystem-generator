@@ -91,8 +91,8 @@ final class PlanetPlacement implements PlanetPlacementInterface
         $leftRingPoint = $planetLocation->getLeft();
         $rightRingPoint = $planetLocation->getRight();
 
-        $mapData->setField(new Field($leftRingPoint, $leftRingFieldId), false, true);
-        $mapData->setField(new Field($rightRingPoint, $rightRingFieldId), false, true);
+        $mapData->setField(new Field($leftRingPoint, $leftRingFieldId), BlockedFieldTypeEnum::MASS_CENTER_PERIMETER_BLOCK);
+        $mapData->setField(new Field($rightRingPoint, $rightRingFieldId), BlockedFieldTypeEnum::MASS_CENTER_PERIMETER_BLOCK);
 
         $mapData->blockField($leftRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
         $mapData->blockField($rightRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);

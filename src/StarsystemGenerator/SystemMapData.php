@@ -8,6 +8,7 @@ use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Exception\EdgeBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
+use Stu\StarsystemGenerator\Exception\MassCenterPerimeterBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\UnknownFieldIndexException;
 use Stu\StarsystemGenerator\Lib\FieldInterface;
 use Stu\StarsystemGenerator\Lib\GeometryCalculations;
@@ -103,11 +104,8 @@ final class SystemMapData implements SystemMapDataInterface
         return $point->getX() + ($point->getY() - 1) * $this->width;
     }
 
-    public function setField(
-        FieldInterface $field,
-        bool $allowSoftBlock = false,
-        bool $allowEdgeBlock = false
-    ): SystemMapDataInterface {
+    public function setField(FieldInterface $field, int $maxAllowedBlock = 0): SystemMapDataInterface
+    {
         $index = $this->getFieldIndex($field->getPoint());
 
         if (!array_key_exists($index, $this->fieldData)) {
@@ -120,21 +118,33 @@ final class SystemMapData implements SystemMapDataInterface
 
         $blockType = $this->blockedFields[$index];
 
-        if ($blockType === BlockedFieldTypeEnum::HARD_BLOCK) {
-            throw new HardBlockedFieldException('field can not be used, hard block');
-        }
-
-        if (!$allowEdgeBlock && $blockType === BlockedFieldTypeEnum::EDGE_BLOCK) {
-            throw new EdgeBlockedFieldException('field can not be used, edge block');
-        }
-
-        if (!$allowSoftBlock && $blockType === BlockedFieldTypeEnum::SOFT_BLOCK) {
-            throw new RuntimeException('field can not be used, soft block');
+        $throwException = $blockType > $maxAllowedBlock;
+        if ($throwException) {
+            $this->throwBlockTypeException($blockType);
         }
 
         $this->fieldData[$index] = $field->getId();
 
         return $this;
+    }
+
+    private function throwBlockTypeException(int $blockType): void
+    {
+        if ($blockType === BlockedFieldTypeEnum::HARD_BLOCK) {
+            throw new HardBlockedFieldException('field can not be used, hard block');
+        }
+
+        if ($blockType === BlockedFieldTypeEnum::MASS_CENTER_PERIMETER_BLOCK) {
+            throw new MassCenterPerimeterBlockedFieldException('field can not be used, mass center perimeter block');
+        }
+
+        if ($blockType === BlockedFieldTypeEnum::EDGE_BLOCK) {
+            throw new EdgeBlockedFieldException('field can not be used, edge block');
+        }
+
+        if ($blockType === BlockedFieldTypeEnum::SOFT_BLOCK) {
+            throw new RuntimeException('field can not be used, soft block');
+        }
     }
 
     public function getAsteroidRing(int $radiusPercentage, int $variance): array
@@ -292,7 +302,8 @@ final class SystemMapData implements SystemMapDataInterface
                     $point,
                     false,
                     null,
-                    $fieldType === FieldTypeEnum::MASS_CENTER ? BlockedFieldTypeEnum::HARD_BLOCK : BlockedFieldTypeEnum::SOFT_BLOCK
+                    $fieldType === FieldTypeEnum::MASS_CENTER
+                        ? BlockedFieldTypeEnum::MASS_CENTER_PERIMETER_BLOCK : BlockedFieldTypeEnum::SOFT_BLOCK
                 );
             }
         }
