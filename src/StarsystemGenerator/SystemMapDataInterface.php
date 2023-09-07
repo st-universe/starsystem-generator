@@ -14,7 +14,8 @@ interface SystemMapDataInterface
 
     public function setField(
         FieldInterface $field,
-        bool $allowSoftBlock = false
+        bool $allowSoftBlock = false,
+        bool $allowEdgeBlock = false
     ): SystemMapDataInterface;
 
     public function blockField(

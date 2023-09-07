@@ -8,6 +8,7 @@ use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
 use Stu\StarsystemGenerator\Exception\DisplayNotSuitableForMoonException;
+use Stu\StarsystemGenerator\Exception\EdgeBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\UnknownFieldIndexException;
@@ -62,7 +63,10 @@ final class MoonPlacement implements MoonPlacementInterface
 
                     break;
                 }
-            } catch (UnknownFieldIndexException | HardBlockedFieldException | FieldAlreadyUsedException $e) {
+            } catch (
+                UnknownFieldIndexException | EdgeBlockedFieldException
+                | HardBlockedFieldException | FieldAlreadyUsedException $e
+            ) {
                 //nothing to do here
             }
 

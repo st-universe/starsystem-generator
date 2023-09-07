@@ -91,7 +91,7 @@ final class PlanetPlacementTest extends StuTestCase
                     return false;
                 }
                 return true;
-            }), true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK)
+            }), true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::HARD_BLOCK)
             ->once();
 
         $planetAmount = 1;

@@ -5,6 +5,7 @@ namespace Stu\StarsystemGenerator;
 use RuntimeException;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
+use Stu\StarsystemGenerator\Exception\EdgeBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\FieldAlreadyUsedException;
 use Stu\StarsystemGenerator\Exception\HardBlockedFieldException;
 use Stu\StarsystemGenerator\Exception\UnknownFieldIndexException;
@@ -32,6 +33,7 @@ final class SystemMapData implements SystemMapDataInterface
         $this->height = $height;
         $this->fieldData = $this->initFieldArray(0);
         $this->blockedFields = $this->initFieldArray(BlockedFieldTypeEnum::NOT_BLOCKED);
+        $this->blockOuterEdge();
     }
 
     /**
@@ -49,6 +51,26 @@ final class SystemMapData implements SystemMapDataInterface
         }
 
         return $result;
+    }
+
+    private function blockOuterEdge(): void
+    {
+        // top edge
+        foreach (range(1, $this->getWidth()) as $x) {
+            $this->blockField(new Point($x, 1), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
+        }
+        // bottom edge
+        foreach (range(1, $this->getWidth()) as $x) {
+            $this->blockField(new Point($x, $this->getHeight()), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
+        }
+        // left edge
+        foreach (range(1, $this->getHeight()) as $y) {
+            $this->blockField(new Point(1, $y), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
+        }
+        // right edge
+        foreach (range(1, $this->getHeight()) as $y) {
+            $this->blockField(new Point($this->getWidth(), $y), false, null, BlockedFieldTypeEnum::EDGE_BLOCK);
+        }
     }
 
     public function getWidth(): int
@@ -81,8 +103,11 @@ final class SystemMapData implements SystemMapDataInterface
         return $point->getX() + ($point->getY() - 1) * $this->width;
     }
 
-    public function setField(FieldInterface $field, bool $allowSoftBlock = false): SystemMapDataInterface
-    {
+    public function setField(
+        FieldInterface $field,
+        bool $allowSoftBlock = false,
+        bool $allowEdgeBlock = false
+    ): SystemMapDataInterface {
         $index = $this->getFieldIndex($field->getPoint());
 
         if (!array_key_exists($index, $this->fieldData)) {
@@ -97,6 +122,10 @@ final class SystemMapData implements SystemMapDataInterface
 
         if ($blockType === BlockedFieldTypeEnum::HARD_BLOCK) {
             throw new HardBlockedFieldException('field can not be used, hard block');
+        }
+
+        if (!$allowEdgeBlock && $blockType === BlockedFieldTypeEnum::EDGE_BLOCK) {
+            throw new EdgeBlockedFieldException('field can not be used, edge block');
         }
 
         if (!$allowSoftBlock && $blockType === BlockedFieldTypeEnum::SOFT_BLOCK) {

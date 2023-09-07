@@ -78,7 +78,7 @@ final class PlanetPlacement implements PlanetPlacementInterface
             $this->addPlanetRing($randomPlanetFieldId, $centerPoint, $mapData);
         }
 
-        $mapData->blockField($centerPoint, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::SOFT_BLOCK);
+        $mapData->blockField($centerPoint, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::HARD_BLOCK);
 
         return $planetDisplay;
     }
@@ -91,8 +91,8 @@ final class PlanetPlacement implements PlanetPlacementInterface
         $leftRingPoint = $planetLocation->getLeft();
         $rightRingPoint = $planetLocation->getRight();
 
-        $mapData->setField(new Field($leftRingPoint, $leftRingFieldId));
-        $mapData->setField(new Field($rightRingPoint, $rightRingFieldId));
+        $mapData->setField(new Field($leftRingPoint, $leftRingFieldId), false, true);
+        $mapData->setField(new Field($rightRingPoint, $rightRingFieldId), false, true);
 
         $mapData->blockField($leftRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
         $mapData->blockField($rightRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);

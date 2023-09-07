@@ -112,14 +112,22 @@ final class SystemMapDataTest extends StuTestCase
 
     public function testToString(): void
     {
-        $mapData = new SystemMapData(3, 2);
-
-        $mapData->setField(new Field(new Point(2, 1), 5));
+        $mapData = new SystemMapData(3, 4);
+        $mapData->setField(new Field(new Point(2, 2), 5));
 
         static::assertEquals(
-            "0,5,0\n"
+            "0,0,0\n"
+                . "0,5,0\n"
+                . "0,0,0\n"
                 . "0,0,0\n",
             $mapData->toString()
+        );
+        static::assertEquals(
+            "2,2,2\n"
+                . "2,0,2\n"
+                . "2,0,2\n"
+                . "2,2,2\n",
+            $mapData->toString(false, true)
         );
     }
 }
