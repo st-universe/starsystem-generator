@@ -99,13 +99,13 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
             $this->stuRandom->rand(0, $varianceMaximum)
         );
 
-        $this->insertGaps($possibleLocations);
+        $ringWithGaps = $this->insertGaps($possibleLocations);
 
         $asteroidType = $this->getAsteroidType($radiusPercentage);
 
         $asteroidRingPoints = [];
 
-        foreach ($possibleLocations as $point) {
+        foreach ($ringWithGaps as $point) {
             if ($maxAsteroidsToSpawn === 0) {
                 break;
             }
@@ -140,12 +140,18 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
         }
     }
 
-    /** @param array<int, PointInterface> $ringPoints */
-    private function insertGaps(array &$ringPoints): void
+    /** 
+     * @param array<int, PointInterface> $ringPoints 
+     * 
+     * @return array<int, PointInterface>
+     * */
+    private function insertGaps(array $ringPoints): array
     {
         $gapCount = count($ringPoints) / self::RING_POINTS_PER_GAP;
 
         //echo sprintf('gapCount: %d', $gapCount);
+
+        $gapAngles = [];
 
         for ($i = 0; $i < $gapCount; $i++) {
             $gapAngle = $this->stuRandom->rand(1, self::MAXIMUM_GAP_ANGLE, true);
@@ -154,9 +160,15 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
             //echo sprintf('gapAngle: %d+%d', $gapStartAngle, $gapAngle);
 
             for ($angle = $gapStartAngle; $angle <= $gapStartAngle + $gapAngle; $angle++) {
-                unset($ringPoints[$angle]);
+                $gapAngles[] = $angle;
             }
         }
+
+        return array_filter(
+            $ringPoints,
+            fn (int $angle) => !in_array($angle, $gapAngles),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     private function getAsteroidType(int $radiusPercentage): int
