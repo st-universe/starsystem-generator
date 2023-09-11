@@ -61,7 +61,7 @@ final class PlanetPlacementTest extends StuTestCase
             ->andReturn(201);
 
         $this->stuRandom->shouldReceive('rand')
-            ->with(30, 60, true)
+            ->with(30, 80, true)
             ->once()
             ->andReturn(45);
 
