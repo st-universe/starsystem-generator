@@ -3,20 +3,12 @@
 namespace Stu\StarsystemGenerator;
 
 use Mockery\MockInterface;
-use Stu\StarsystemGenerator\Component\AsteroidRingGenerator;
 use Stu\StarsystemGenerator\Component\AsteroidRingGeneratorInterface;
-use Stu\StarsystemGenerator\Component\LoadSystemConfiguration;
 use Stu\StarsystemGenerator\Component\LoadSystemConfigurationInterface;
-use Stu\StarsystemGenerator\Component\MassCenterGenerator;
 use Stu\StarsystemGenerator\Component\MassCenterGeneratorInterface;
-use Stu\StarsystemGenerator\Component\PlanetMoonGenerator;
 use Stu\StarsystemGenerator\Component\PlanetMoonGeneratorInterface;
-use Stu\StarsystemGenerator\Component\PlanetPlacement;
-use Stu\StarsystemGenerator\Component\SizeGenerator;
 use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
-use Stu\StarsystemGenerator\Config\PlanetMoonProbabilities;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
-use Stu\StarsystemGenerator\Lib\StuRandom;
 
 final class StarsystemGeneratorTest extends StuTestCase
 {
