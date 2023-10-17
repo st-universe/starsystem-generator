@@ -37,6 +37,7 @@ final class PlanetMoonProbabilities implements PlanetMoonProbabilitiesInterface
         305 => 9,
         303 => 9,
         301 => 9,
+        311 => 9
     ];
 
 
