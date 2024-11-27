@@ -2247,7 +2247,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/st-universe/assets.git",
-                "reference": "e538a7782746a9e1694b2d80e1a5bef51bb6affb"
+                "reference": "86d0210108522db14e0dfda902cca35ca8bd7c19"
             },
             "require": {
                 "ext-gd": "*",
@@ -2260,7 +2260,7 @@
                 "proprietary"
             ],
             "description": "STU Assets",
-            "time": "2023-07-07T17:09:49+00:00"
+            "time": "2024-11-27T07:55:00+00:00"
         },
         {
             "name": "theseer/tokenizer",
