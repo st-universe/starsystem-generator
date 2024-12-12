@@ -82,7 +82,7 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
         $partialDistance = $leftWidth / 2 / ($ringCount + 1);
 
         for ($i = 1; $i <= $ringCount; $i++) {
-            $ringRadiusPercentages[] = (int)(($partialDistance * $i + $overallMassCenterWidth / 2) / ($mapData->getWidth() / 2) * 100);
+            $ringRadiusPercentages[] = (int)round(($partialDistance * $i + $overallMassCenterWidth / 2) / ($mapData->getWidth() / 2) * 100);
         }
 
         return $ringRadiusPercentages;
@@ -166,7 +166,7 @@ final class AsteroidRingGenerator implements AsteroidRingGeneratorInterface
 
         return array_filter(
             $ringPoints,
-            fn (int $angle) => !in_array($angle, $gapAngles),
+            fn(int $angle) => !in_array($angle, $gapAngles),
             ARRAY_FILTER_USE_KEY
         );
     }

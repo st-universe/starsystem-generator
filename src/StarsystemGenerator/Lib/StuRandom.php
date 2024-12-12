@@ -18,8 +18,8 @@ class StuRandom
 
     private function generateRandomValueStandardNormalDistribution(int $min, int $max): int
     {
-        $mean = (int)(($min + $max) / 2); // MW
-        $stdDeviation = (int) ($mean / 2.5); // FWHM
+        $mean = (int)round(($min + $max) / 2); // MW
+        $stdDeviation = (int)round($mean / 2.5); // FWHM
 
         do {
             $value = random_int($min, $max);

@@ -68,12 +68,12 @@ final class SystemMapData implements SystemMapDataInterface
 
     public function getRandomPlanetAmount(StuRandom $stuRandom): int
     {
-        return (int)($this->getFieldAmount() / $stuRandom->rand(36, 81, true));
+        return (int)round($this->getFieldAmount() / $stuRandom->rand(36, 81, true));
     }
 
     public function getRandomMoonAmount(StuRandom $stuRandom): int
     {
-        return (int)($this->getFieldAmount() / $stuRandom->rand(19, 62, true));
+        return (int)round($this->getFieldAmount() / $stuRandom->rand(19, 62, true));
     }
 
     private function getFieldAmount(): int
@@ -185,14 +185,14 @@ final class SystemMapData implements SystemMapDataInterface
     {
         $result = [];
 
-        $radius = (int)($this->getWidth() / 2 * $radiusPercentage / 100);
+        $radius = (int)round($this->getWidth() / 2 * $radiusPercentage / 100);
 
         if ($radius === 0) {
             return $result;
         }
 
-        $centerX = $this->getWidth() / 2;
-        $centerY = $this->getHeight() / 2;
+        $centerX = (int)round($this->getWidth() / 2);
+        $centerY = (int)round($this->getHeight() / 2);
 
         $centerPoint = new Point($centerX, $centerY);
         $topCenterPoint = new Point($centerX, 0);
@@ -238,7 +238,7 @@ final class SystemMapData implements SystemMapDataInterface
                 echo implode(
                     "&nbsp;&nbsp;",
                     array_map(
-                        fn (int $value) => sprintf('<td style="width: 30px; height: 30px; text-align: center;">%d</td>', $value),
+                        fn(int $value) => sprintf('<td style="width: 30px; height: 30px; text-align: center;">%d</td>', $value),
                         array_slice($values, ($y - 1) * $this->getWidth(), $this->getWidth())
                     )
                 );
