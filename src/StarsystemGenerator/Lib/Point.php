@@ -4,14 +4,7 @@ namespace Stu\StarsystemGenerator\Lib;
 
 class Point implements PointInterface
 {
-    private int $x;
-    private int $y;
-
-    public function __construct(int $x, int $y)
-    {
-        $this->x = $x;
-        $this->y = $y;
-    }
+    public function __construct(private int $x, private int $y) {}
 
     public function getX(): int
     {

@@ -24,7 +24,7 @@ final class PlanetMoonRange
             return self::MOON_RANGES[$planetType];
         }
 
-        if ((int)($planetType / 100) === 3) {
+        if ((int)round($planetType / 100) === 3) {
             return self::MOON_RANGE_FOR_RING_PLANETS;
         }
 

@@ -67,7 +67,7 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
      */
     private function blockMassCenterArea(array $fields, SystemMapDataInterface $mapData): void
     {
-        $points = array_map(fn (FieldInterface $field) => $field->getPoint(), $fields);
+        $points = array_map(fn(FieldInterface $field) => $field->getPoint(), $fields);
         $convexHull = $this->calculateConvexHull($points);
 
         //echo print_r($convexHull, true);
@@ -165,14 +165,14 @@ final class MassCenterGenerator implements MassCenterGeneratorInterface
         $systemWidth = $mapData->getWidth();
         $systemHeight = $mapData->getHeight();
 
-        $xOffset = (int)(($systemWidth - $overallWidth) / 2);
-        $yOffset = (int)(($systemHeight - $overallHeight) / 2);
+        $xOffset = (int)floor(($systemWidth - $overallWidth) / 2);
+        $yOffset = (int)floor(($systemHeight - $overallHeight) / 2);
 
         $mapFields = [];
 
         foreach ($fields as $key => $type) {
             $column = $key % $massCenterSize + 1;
-            $row = ((int) $key / $massCenterSize) + 1;
+            $row = ((int)floor($key / $massCenterSize)) + 1;
 
             if ($isFirstMassCenter) {
                 $x = $xOffset + $column;

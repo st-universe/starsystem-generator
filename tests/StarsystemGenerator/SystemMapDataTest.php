@@ -31,7 +31,15 @@ final class SystemMapDataTest extends StuTestCase
     public static function provideBlockedFieldsForPlanetData()
     {
         return [
-            [2, 2], [2, 3], [2, 4], [3, 2], [3, 3], [3, 4], [4, 2], [4, 3], [4, 4]
+            [2, 2],
+            [2, 3],
+            [2, 4],
+            [3, 2],
+            [3, 3],
+            [3, 4],
+            [4, 2],
+            [4, 3],
+            [4, 4]
         ];
     }
 
@@ -56,11 +64,31 @@ final class SystemMapDataTest extends StuTestCase
     public static function provideBlockedFieldsForMassCenterData()
     {
         return [
-            [1, 1], [2, 1], [3, 1], [4, 1], [5, 1],
-            [1, 2], [2, 2], [3, 2], [4, 2], [5, 2],
-            [1, 3], [2, 3], [3, 3], [4, 3], [5, 3],
-            [1, 4], [2, 4], [3, 4], [4, 4], [5, 4],
-            [1, 5], [2, 5], [3, 5], [4, 5], [5, 5]
+            [1, 1],
+            [2, 1],
+            [3, 1],
+            [4, 1],
+            [5, 1],
+            [1, 2],
+            [2, 2],
+            [3, 2],
+            [4, 2],
+            [5, 2],
+            [1, 3],
+            [2, 3],
+            [3, 3],
+            [4, 3],
+            [5, 3],
+            [1, 4],
+            [2, 4],
+            [3, 4],
+            [4, 4],
+            [5, 4],
+            [1, 5],
+            [2, 5],
+            [3, 5],
+            [4, 5],
+            [5, 5]
         ];
     }
 
@@ -94,14 +122,14 @@ final class SystemMapDataTest extends StuTestCase
         $result = $mapData->getAsteroidRing(50, 0);
 
         $this->assertEquals([
-            0 => new Point(2, 1),
-            45 => new Point(3, 1),
-            90 => new Point(4, 2),
-            117 => new Point(4, 3),
-            153 => new Point(3, 4),
-            180 => new Point(2, 4),
-            225 => new Point(1, 3),
-            270 => new Point(1, 2),
+            0 => new Point(3, 2),
+            45 => new Point(4, 2),
+            90 => new Point(4, 3),
+            135 => new Point(4, 4),
+            180 => new Point(3, 4),
+            225 => new Point(2, 4),
+            270 => new Point(2, 3),
+            315 => new Point(2, 2)
         ], $result);
     }
 

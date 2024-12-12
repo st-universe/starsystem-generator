@@ -82,7 +82,7 @@ final class PlanetPlacement implements PlanetPlacementInterface
         }
 
         //hard block fields left and right if ring planet
-        if ((int)($randomPlanetFieldId / 100) === 3) {
+        if ((int)round($randomPlanetFieldId / 100) === 3) {
             $this->addPlanetRing($randomPlanetFieldId, $centerPoint, $mapData);
         }
 
@@ -144,8 +144,9 @@ final class PlanetPlacement implements PlanetPlacementInterface
         $firstPoint = $planetDisplay->getFirstPoint();
         $lastPoint = $planetDisplay->getLastPoint();
 
-        return new Point(($firstPoint->getX() + $lastPoint->getX()) / 2,
-            ($firstPoint->getY() + $lastPoint->getY()) / 2
+        return new Point(
+            (int)round(($firstPoint->getX() + $lastPoint->getX()) / 2),
+            (int)round(($firstPoint->getY() + $lastPoint->getY()) / 2)
         );
     }
 
