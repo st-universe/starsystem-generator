@@ -14,6 +14,7 @@ use Stu\StarsystemGenerator\Component\MoonPlacement;
 use Stu\StarsystemGenerator\Component\PlanetMoonGenerator;
 use Stu\StarsystemGenerator\Component\PlanetMoonGeneratorInterface;
 use Stu\StarsystemGenerator\Component\PlanetPlacement;
+use Stu\StarsystemGenerator\Component\PlanetRingPlacement;
 use Stu\StarsystemGenerator\Component\SizeGenerator;
 use Stu\StarsystemGenerator\Component\SizeGeneratorInterface;
 use Stu\StarsystemGenerator\Config\PlanetMoonProbabilities;
@@ -44,6 +45,7 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
     public static function getInstance(): StarsystemGeneratorInterface
     {
         $planetMoonProbabilities = new PlanetMoonProbabilities();
+        $planetRingPlacement = new PlanetRingPlacement();
         $stuRandom = new StuRandom();
 
         return new StarsystemGenerator(
@@ -52,7 +54,7 @@ final class StarsystemGenerator implements StarsystemGeneratorInterface
             new MassCenterGenerator(),
             new AsteroidRingGenerator($stuRandom),
             new PlanetMoonGenerator(
-                new PlanetPlacement($planetMoonProbabilities, $stuRandom),
+                new PlanetPlacement($planetMoonProbabilities, $planetRingPlacement, $stuRandom),
                 new MoonPlacement($planetMoonProbabilities, $stuRandom),
                 $stuRandom
             )

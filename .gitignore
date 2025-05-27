@@ -2,3 +2,4 @@ example/assets
 vendor
 build
 .githooks
+.vscode

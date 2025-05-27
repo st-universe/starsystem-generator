@@ -4,7 +4,9 @@ namespace Stu\StarsystemGenerator\Component;
 
 use Mockery;
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Stu\StarsystemGenerator\Config\PlanetMoonProbabilitiesInterface;
+use Stu\StarsystemGenerator\Config\PlanetRadius;
 use Stu\StarsystemGenerator\Config\SystemConfigurationInterface;
 use Stu\StarsystemGenerator\Enum\BlockedFieldTypeEnum;
 use Stu\StarsystemGenerator\Enum\FieldTypeEnum;
@@ -18,11 +20,12 @@ use Stu\StarsystemGenerator\SystemMapDataInterface;
 
 final class PlanetPlacementTest extends StuTestCase
 {
-    /** @var MockInterface|PlanetMoonProbabilitiesInterface  */
-    private MockInterface $planetMoonProbabilities;
-
-    /** @var MockInterface|StuRandom  */
-    private MockInterface $stuRandom;
+    /** @var MockInterface&PlanetMoonProbabilitiesInterface  */
+    private $planetMoonProbabilities;
+    /** @var MockInterface&PlanetRingPlacementInterface  */
+    private $planetRingPlacement;
+    /** @var MockInterface&StuRandom  */
+    private $stuRandom;
 
     /** @var MockInterface|SystemMapDataInterface  */
     private MockInterface $mapData;
@@ -35,15 +38,34 @@ final class PlanetPlacementTest extends StuTestCase
     public function setUp(): void
     {
         $this->planetMoonProbabilities = $this->mock(PlanetMoonProbabilitiesInterface::class);
+        $this->planetRingPlacement = $this->mock(PlanetRingPlacementInterface::class);
         $this->stuRandom = $this->mock(StuRandom::class);
+
         $this->mapData = $this->mock(SystemMapDataInterface::class);
         $this->config = $this->mock(SystemConfigurationInterface::class);
 
-        $this->subject = new PlanetPlacement($this->planetMoonProbabilities, $this->stuRandom);
+        $this->subject = new PlanetPlacement(
+            $this->planetMoonProbabilities,
+            $this->planetRingPlacement,
+            $this->stuRandom
+        );
     }
 
-    public function testPlacePlanet(): void
+    public static function dataProvider(): array
     {
+        return [
+            [201, false],
+            [263, false],
+            [301, true],
+            [363, true]
+        ];
+    }
+
+    #[DataProvider('dataProvider')]
+    public function testPlacePlanet(
+        int $randomPlanetFieldId,
+        bool $expectRingPlacement
+    ): void {
         $planetAmount = 1;
 
         $this->config->shouldReceive('getProbabilities')
@@ -58,10 +80,14 @@ final class PlanetPlacementTest extends StuTestCase
         $this->planetMoonProbabilities->shouldReceive('pickRandomFieldId')
             ->with([], [1, 2, 3], [4, 5, 6])
             ->once()
-            ->andReturn(201);
+            ->andReturn($randomPlanetFieldId);
 
         $this->stuRandom->shouldReceive('rand')
-            ->with(30, 80, true)
+            ->with(
+                PlanetRadius::PLANET_RADIUS_PERCENTAGE[$randomPlanetFieldId][0],
+                PlanetRadius::PLANET_RADIUS_PERCENTAGE[$randomPlanetFieldId][1],
+                true
+            )
             ->once()
             ->andReturn(45);
 
@@ -82,8 +108,8 @@ final class PlanetPlacementTest extends StuTestCase
             ->once()
             ->andReturn($planetDisplay);
         $this->mapData->shouldReceive('setField')
-            ->with(Mockery::on(function (FieldInterface $field) {
-                if ($field->getId() !== 201) {
+            ->with(Mockery::on(function (FieldInterface $field) use ($randomPlanetFieldId) {
+                if ($field->getId() !== $randomPlanetFieldId) {
                     return false;
                 }
                 if ($field->getPoint()->getX() !== 42) {
@@ -119,6 +145,11 @@ final class PlanetPlacementTest extends StuTestCase
             }), true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::HARD_BLOCK)
             ->once();
 
+        if ($expectRingPlacement) {
+            $this->planetRingPlacement->shouldReceive('addPlanetRing')
+                ->with($randomPlanetFieldId, Mockery::any(), Mockery::any())
+                ->once();
+        }
 
         $this->subject->placePlanet(
             $planetAmount,

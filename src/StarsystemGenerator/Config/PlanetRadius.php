@@ -9,7 +9,7 @@ use Stu\StarsystemGenerator\Lib\StuRandom;
 
 final class PlanetRadius
 {
-    private const PLANET_RADIUS_PERCENTAGE = [
+    public const PLANET_RADIUS_PERCENTAGE = [
         201    =>     [30,    80],
         203    =>     [25,    70],
         205    =>     [20,    65],

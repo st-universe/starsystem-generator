@@ -22,16 +22,11 @@ final class PlanetPlacement implements PlanetPlacementInterface
     public const MAX_TRIED_PLANET_TYPES = 20;
     public const MAX_RETRIES_PER_PLANET_TYPE = 5;
 
-    private PlanetMoonProbabilitiesInterface $planetMoonProbabilities;
-    private StuRandom $stuRandom;
-
     public function __construct(
-        PlanetMoonProbabilitiesInterface $planetMoonProbabilities,
-        StuRandom $stuRandom
-    ) {
-        $this->planetMoonProbabilities = $planetMoonProbabilities;
-        $this->stuRandom = $stuRandom;
-    }
+        private PlanetMoonProbabilitiesInterface $planetMoonProbabilities,
+        private PlanetRingPlacementInterface $planetRingPlacement,
+        private StuRandom $stuRandom
+    ) {}
 
     public function placePlanet(int &$planetAmount, SystemMapDataInterface $mapData, SystemConfigurationInterface $config): PlanetDisplayInterface
     {
@@ -82,28 +77,13 @@ final class PlanetPlacement implements PlanetPlacementInterface
         }
 
         //hard block fields left and right if ring planet
-        if ((int)round($randomPlanetFieldId / 100) === 3) {
-            $this->addPlanetRing($randomPlanetFieldId, $centerPoint, $mapData);
+        if ((int)($randomPlanetFieldId / 100) === 3) {
+            $this->planetRingPlacement->addPlanetRing($randomPlanetFieldId, $centerPoint, $mapData);
         }
 
         $mapData->blockField($centerPoint, true, FieldTypeEnum::PLANET, BlockedFieldTypeEnum::HARD_BLOCK);
 
         return $planetDisplay;
-    }
-
-    private function addPlanetRing(int $planetFieldId, PointInterface $planetLocation, SystemMapDataInterface $mapData): void
-    {
-        $leftRingFieldId = $planetFieldId * 10 + 1;
-        $rightRingFieldId = $planetFieldId * 10 + 2;
-
-        $leftRingPoint = $planetLocation->getLeft();
-        $rightRingPoint = $planetLocation->getRight();
-
-        $mapData->setField(new Field($leftRingPoint, $leftRingFieldId), BlockedFieldTypeEnum::MASS_CENTER_PERIMETER_BLOCK);
-        $mapData->setField(new Field($rightRingPoint, $rightRingFieldId), BlockedFieldTypeEnum::MASS_CENTER_PERIMETER_BLOCK);
-
-        $mapData->blockField($leftRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
-        $mapData->blockField($rightRingPoint, false, null, BlockedFieldTypeEnum::HARD_BLOCK);
     }
 
     /**
