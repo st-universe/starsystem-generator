@@ -29,7 +29,7 @@
     "phpstan/phpstan-doctrine": "^2.0",
     "phpstan/phpstan-mockery": "^2.0",
     "phpstan/phpstan-phpunit": "^2.0",
-    "phpunit/phpunit": "^11",
+    "phpunit/phpunit": "^12",
     "st-universe/assets": "dev-master"
   },
   "config": {
